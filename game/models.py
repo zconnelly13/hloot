@@ -131,6 +131,12 @@ class Image(models.Model):
         COMPLETED = 'COMPLETED'
 
     prompt = models.CharField(max_length=1024)
+    choice1 = models.URLField(null=True, blank=True)
+    choice2 = models.URLField(null=True, blank=True)
+    choice3 = models.URLField(null=True, blank=True)
+    choice4 = models.URLField(null=True, blank=True)
+    selection = models.URLField(null=True, blank=True)
+    external_id = models.CharField(max_length=1024, null=True, blank=True)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.NOT_STARTED)
@@ -145,10 +151,16 @@ class Image(models.Model):
 
     def generate(self):
         # TODO: Actually call midjourney API
+        self.external_id = '1234'
+
+        # Real Code
         self.status = Image.Status.PENDING
         self.save()
 
     def check_completed(self):
         # TODO: Actually call midjourney API
+        self.selection = 'https://picsum.photos/1024'
+
+        # Real Code
         self.status = Image.Status.COMPLETED
         self.save()

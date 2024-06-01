@@ -133,6 +133,8 @@ class TestImageGeneration(TestCase):
         image = Image(prompt='Dogs playing poker.', game=g, player=p, round=0)
         self.assertEqual(image.status, Image.Status.NOT_STARTED)
         image.generate()
+        self.assertIsNotNone(image.external_id)
         self.assertEqual(image.status, Image.Status.PENDING)
         image.check_completed()
+        self.assertIsNotNone(image.selection)
         self.assertEqual(image.status, Image.Status.COMPLETED)

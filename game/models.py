@@ -1,3 +1,5 @@
+import random
+
 from django.db import models
 
 
@@ -30,13 +32,12 @@ class Game(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not self.code:
+            self.code = str(random.randint(1000, 9999))
         if len(self.code) != 4:
             raise ValueError('Game code must be 4 characters long.')
         if not self.code.isdigit():
             raise ValueError('Game code must be a number.')
-        if Game.objects.filter(code=self.code).exists():
-            raise ValueError('Game with that code already exists.')
-        self.save()
 
     def game_loop(self):
         images = Image.objects.filter(game=self)
@@ -70,7 +71,8 @@ class Game(models.Model):
         if player != self.current_player:
             raise ValueError('It is not this player\'s turn.')
 
-        Image(prompt=prompt, game=self, player=player, round=self.current_round)
+        image = Image(prompt=prompt, game=self, player=player, round=self.current_round)
+        image.save()
         self.round_state = Game.RoundState.IMAGE_GENERATION
         self.save()
 
@@ -80,7 +82,8 @@ class Game(models.Model):
         if self.round_state != Game.RoundState.GUESSING:
             raise ValueError('It is not the guessing phase.')
 
-        Image(prompt=guess, game=self, player=player, round=self.current_round)
+        image = Image(prompt=guess, game=self, player=player, round=self.current_round)
+        image.save()
         self.save()
 
     def set_current_player(self, player):
@@ -88,7 +91,7 @@ class Game(models.Model):
         self.save()
 
     def has_sufficient_players(self):
-        return self.player_set.count() >= 2
+        return self.get_players().count() >= 2
 
     def has_started(self):
         return self.state == Game.State.PLAYING
@@ -99,11 +102,20 @@ class Game(models.Model):
         self.state = Game.State.PLAYING
         self.save()
 
+    def url(self):
+        return f'/game/{self.code}'
+
+    def get_players(self):
+        return Player.objects.filter(game=self)
+
 
 class Player(models.Model):
     name = models.CharField(max_length=30)
     score = models.IntegerField(default=0)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('name', 'game')
 
     def __str__(self):
         return f'Player {self.name}'
@@ -116,10 +128,6 @@ class Player(models.Model):
 
         if len(self.name) > 30:
             raise ValueError('Player name cannot be longer than 30 characters.')
-
-        if Player.objects.filter(name=self.name, game=self.game).exists():
-            raise ValueError('Player with that name already exists in this game.')
-        self.save()
 
 
 class Image(models.Model):
@@ -144,7 +152,6 @@ class Image(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.save()
 
     def __str__(self):
         return f'Image {self.url}'

@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.db.utils import IntegrityError
 
 
 from game.models import Game
@@ -7,16 +8,30 @@ from game.models import Player
 
 
 class TestGameCreation(TestCase):
+    def test_create_game_random_code(self):
+        # Create a game with a random code
+        game = Game()
+        self.assertIsNotNone(game.code)
+        self.assertEqual(len(game.code), 4)
+
+    def test_game_has_url(self):
+        # Create a game
+        game = Game(code='1234')
+        self.assertEqual(game.url(), '/game/1234')
+
     def test_create_game(self):
         # Create the game
         game = Game(code='1234')
-        Player(name='Zac', game=game)
+        game.save()
+        p1 = Player(name='Zac', game=game)
+        p1.save()
         self.assertFalse(game.has_sufficient_players())
         self.assertEqual(game.state, Game.State.WAITING)
         self.assertFalse(game.has_started())
 
         # Add a second player
-        Player(name='Sarah', game=game)
+        p2 = Player(name='Sarah', game=game)
+        p2.save()
         self.assertTrue(game.has_sufficient_players())
         self.assertEqual(game.state, Game.State.WAITING)
         self.assertFalse(game.has_started())
@@ -31,18 +46,31 @@ class TestGameCreation(TestCase):
         with self.assertRaises(ValueError):
             Game(code='123')
 
+    def test_get_players(self):
+        game = Game(code='1234')
+        game.save()
+        p1 = Player(name='Zac', game=game)
+        p2 = Player(name='Sarah', game=game)
+        p1.save()
+        p2.save()
+        self.assertEqual(list(game.get_players()), [p1, p2])
+
     def test_create_multiple_games_always_has_different_codes(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(IntegrityError):
             g1 = Game(code='1234')
             g1.save()
-            Game(code='1234')
+            g2 = Game(code='1234')
+            g2.save()
 
     def test_no_two_players_with_same_name(self):
         game = Game(code='1234')
-        Player(name='Zac', game=game)
+        game.save()
+        p1 = Player(name='Zac', game=game)
+        p1.save()
 
-        with self.assertRaises(ValueError):
-            Player(name='Zac', game=game)
+        with self.assertRaises(IntegrityError):
+            p2 = Player(name='Zac', game=game)
+            p2.save()
 
 
 class TestPlayerCreation(TestCase):
@@ -68,9 +96,13 @@ class TestPlayerCreation(TestCase):
 class TestGamePlay(TestCase):
     def test_one_round(self):
         game = Game(code='1234')
+        game.save()
         p1 = Player(name='Zac', game=game)
         p2 = Player(name='Sarah', game=game)
         p3 = Player(name='Mark', game=game)
+        p1.save()
+        p2.save()
+        p3.save()
         game.start()
 
         self.assertEqual(game.current_round, 1)
@@ -117,6 +149,9 @@ class TestGamePlay(TestCase):
         game = Game(code='1234')
         p1 = Player(name='Zac', game=game)
         p2 = Player(name='Sarah', game=game)
+        game.save()
+        p1.save()
+        p2.save()
         game.start()
         game.set_current_player(p1)
 

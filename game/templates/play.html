@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Hloot</title>
+    </head>
+    <body>
+        <h1>{{code}}</h1>
+        <p>{{player}}</p>
+        {% if has_sufficient_players %}
+            <form action="" method="post">
+                <input type="hidden" name="code" value="{{code}}">
+                <input type="hidden" name="player" value="{{player}}">
+                <input type="submit" value="Let's go!">
+            </form>
+        {% else %}
+            <p>Waiting for other players...</p>
+        {% endif %}
+    </body>
+</html>

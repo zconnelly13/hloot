@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>Hloot</title>
+    </head>
+    <body>
+        <h1>{{code}}</h1>
+        {% for player in players %}
+            <p>{{ player }}</p>
+        {% endfor %}
+        <br>
+        {{ game.state }}
+        <br>
+        {{ game.round_state }}
+        <br>
+        Current Player: {{ game.current_player }}
+    </body>
+</html>

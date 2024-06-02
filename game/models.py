@@ -60,6 +60,8 @@ class Game(models.Model):
         full_state['current_player'] = self.current_player.name if self.current_player else None
         full_state['players'] = [player.name for player in self.get_players()]
         full_state['images'] = [image.to_dict() for image in Image.objects.filter(game=self)]
+        full_state['has_sufficient_players'] = self.has_sufficient_players()
+        full_state['display_image'] = self.display_image.to_dict() if self.display_image else None
         return full_state
 
     def game_loop(self):
@@ -186,6 +188,7 @@ class Image(models.Model):
 
     def to_dict(self):
         return {
+            'id': self.id,
             'player': self.player.name,
             'prompt': self.prompt,
             'selection': self.selection,
@@ -209,7 +212,7 @@ class Image(models.Model):
 
     def check_completed(self):
         # TODO: Actually call midjourney API
-        self.selection = 'https://picsum.photos/1024'
+        self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'
 
         # Real Code
         self.status = Image.Status.COMPLETED

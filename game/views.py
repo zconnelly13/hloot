@@ -16,6 +16,7 @@ def create_game(request):
 @api_view(['GET'])
 def state(request, code):
     game = Game.objects.get(code=code)
+    game.game_loop()
     return Response(game.full_state(), status=200)
 
 

@@ -209,6 +209,7 @@ class TestGameCreation(TestCase):
         self.assertEqual(full_state.get('current_player'), 'Zac')
         self.assertEqual(full_state.get('players'), ['Zac', 'Sarah'])
         self.assertEqual(full_state.get('images'), [])
+        self.assertEqual(full_state.get('has_sufficient_players'), True)
 
         game.play_prompt(p1, 'Dogs playing poker.')
         game.game_loop()

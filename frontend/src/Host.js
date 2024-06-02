@@ -1,25 +1,203 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 
 function Host() {
-  const [message, setMessage] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialGameCode = searchParams.get('code') || '';
+  const [gameCode, setGameCode] = useState(initialGameCode);
+  const [gameDetails, setGameDetails] = useState(null);
+  const effectRan = useRef(false);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/game/create')
-      .then(response => {
-        setMessage(response.data.message);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, []);
+    if (!gameCode && effectRan.current === false) {
+      axios.post('http://localhost:8000/game/create')
+        .then(response => {
+          const newGameCode = response.data.game_code;
+          setGameCode(newGameCode);
+          setSearchParams({ code: newGameCode });
+          console.log(newGameCode);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+
+      effectRan.current = true;
+    }
+
+    return () => {
+      effectRan.current = false;
+    };
+  }, [gameCode, setSearchParams]);
+
+  useEffect(() => {
+    let interval;
+    if (gameCode) {
+      const fetchGameDetails = () => {
+        axios.get(`http://localhost:8000/game/state/${gameCode}`)
+          .then(response => {
+            setGameDetails(response.data);
+            console.log(response.data);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      };
+
+      fetchGameDetails();
+      interval = setInterval(fetchGameDetails, 1000); // Poll every 1 second
+    }
+
+    return () => clearInterval(interval); // Clear interval on cleanup
+  }, [gameCode]);
 
   return (
-    <div>
-      <h1>Hello, World!</h1>
-      <p>{message}</p>
+    <div style={styles.container}>
+      <center>
+        {gameDetails && gameDetails.state === 'WAITING' && (
+          <>
+            <h2 style={styles.gameCodeLabel}>Game Code</h2>
+            <h1 style={styles.gameCode}>{gameCode}</h1>
+            <div style={styles.waitingContainer}>
+              <h2 style={styles.waitingText}>Waiting for players...</h2>
+              <ul style={styles.playersList}>
+                {gameDetails.players.map((player, index) => (
+                  <li key={index} style={styles.playerItem}>
+                    {player}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+        {gameDetails && gameDetails.state === 'PLAYING' && (
+          <div style={styles.messageContainer}>
+            {gameDetails.round_state === 'PROMPT' && (
+              <h2 style={styles.highlightedText}>{gameDetails.current_player}'s turn</h2>
+            )}
+            {gameDetails.round_state === 'IMAGE_GENERATION' && (
+              <h2 style={styles.highlightedText}>Generating...</h2>
+            )}
+            {gameDetails.round_state === 'GUESSING' && (
+              <div style={styles.polaroid}>
+                {gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round) && (
+                  <>
+                    <img
+                      src={gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round).selection}
+                      alt="Generated"
+                      style={styles.largeImage}
+                    />
+                    <div style={styles.caption}></div>
+                  </>
+                )}
+              </div>
+            )}
+            {gameDetails.round_state === 'PRESENTING' && (
+              <div>
+                {gameDetails.display_image ? (
+                  <div style={styles.polaroid}>
+                    <img
+                      src={gameDetails.display_image.selection}
+                      alt={gameDetails.display_image.prompt}
+                      style={styles.largeImage}
+                    />
+                    <div style={styles.caption}>
+                      {gameDetails.display_image.prompt}
+                    </div>
+                  </div>
+                ) : (
+                  <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </center>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: '#f7f0f0',
+    fontFamily: 'Arial, sans-serif',
+    padding: '2rem',
+  },
+  gameCodeLabel: {
+    fontSize: '2rem',
+    color: '#555',
+    marginBottom: '1rem',
+  },
+  gameCode: {
+    fontSize: '8rem',
+    color: '#333',
+    marginBottom: '2rem',
+  },
+  waitingContainer: {
+    backgroundColor: '#ffefd5',
+    padding: '2rem',
+    borderRadius: '8px',
+    border: '2px solid #ffdead',
+  },
+  waitingText: {
+    fontSize: '3rem',
+    color: '#333',
+    marginBottom: '2rem',
+  },
+  playersList: {
+    listStyleType: 'none',
+    padding: 0,
+  },
+  playerItem: {
+    fontSize: '2.5rem',
+    color: '#555',
+    padding: '1rem 0',
+  },
+  messageContainer: {
+    backgroundColor: '#ffb6c1',
+    padding: '2rem',
+    borderRadius: '8px',
+    border: '2px solid #ff91a4',
+    textAlign: 'center',
+  },
+  highlightedText: {
+    fontSize: '3rem',
+    color: '#fff',
+    textShadow: '1px 1px 3px #000',
+    marginBottom: '2rem',
+  },
+  polaroid: {
+    backgroundColor: 'white',
+    padding: '1rem',
+    border: '2px solid #ddd',
+    borderRadius: '10px',
+    display: 'inline-block',
+    textAlign: 'center',
+    width: '80%',
+    maxWidth: '800px',
+    marginTop: '2rem',
+  },
+  largeImage: {
+    width: '100%',
+    height: 'auto',
+  },
+  caption: {
+    marginTop: '1rem',
+    fontSize: '1.5rem',
+    color: '#555',
+    minHeight: '50px',
+    maxHeight: '100px',
+    overflowY: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.5rem',
+  },
+};
 
 export default Host;

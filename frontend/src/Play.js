@@ -171,7 +171,7 @@ function Play() {
         </div>
       ) : (
         <div style={styles.inputContainer}>
-          <h2>Welcome, {name}!</h2>
+          <h2>Hloot</h2>
           {gameDetails && gameDetails.state === 'WAITING' && gameDetails.has_sufficient_players && (
             <button onClick={handleLetsGo} style={styles.button}>Let's Go</button>
           )}
@@ -190,6 +190,8 @@ function Play() {
               ) : gameDetails.round_state === 'PROMPT' ? (
                 <p style={styles.highlightedText}>{gameDetails.current_player}'s turn...</p>
               ) : gameDetails.round_state === 'IMAGE_GENERATION' ? (
+                <p style={styles.highlightedText}>Generating...</p>
+              ) : gameDetails.round_state === 'GUESSING' && gameDetails.images.find(image => image.round === gameDetails.current_round && image.player === name) ? (
                 <p style={styles.highlightedText}>Generating...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.current_player !== name ? (
                 <div>
@@ -281,7 +283,7 @@ const styles = {
     marginTop: '1rem',
   },
   textarea: {
-    fontSize: '1.5rem',
+    fontSize: '1rem',
     padding: '0.5rem',
     marginBottom: '1rem',
     borderRadius: '4px',

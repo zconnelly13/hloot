@@ -5,12 +5,28 @@
     <body>
         <h1>{{code}}</h1>
         <p>{{player}}</p>
-        {% if has_sufficient_players %}
+        {% if has_sufficient_players and not game_is_started%}
             <form action="" method="post">
                 <input type="hidden" name="code" value="{{code}}">
                 <input type="hidden" name="player" value="{{player}}">
+                <input type="hidden" name="type" value="letsgo">
+                {% csrf_token %}
                 <input type="submit" value="Let's go!">
             </form>
+        {% elif game_is_started %}
+            {% if is_main_player %}
+                <p>It's your turn!</p>
+                <form action="" method="post">
+                    <input type="hidden" name="code" value="{{code}}">
+                    <input type="hidden" name="player" value="{{player}}">
+                    <input type="hidden" name="type" value="submit_text">
+                    <textarea type="text" name="prompt"></textarea>
+                    {% csrf_token %}
+                    <input type="submit" value="Let's go!">
+                </form>
+            {% else %}
+                <p>It's {{ current_player }}'s turn!</p>
+            {% endif %}
         {% else %}
             <p>Waiting for other players...</p>
         {% endif %}

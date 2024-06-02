@@ -29,6 +29,19 @@ def play(request, code):
     player, _ = Player.objects.get_or_create(name=request.GET['name'], game=game)
     context['player'] = player
     context['has_sufficient_players'] = game.has_sufficient_players()
+    context['game_is_started'] = game.has_started()
+    context['is_main_player'] = game.current_player == player
+    context['current_player'] = game.current_player.name
+    context['game_state'] = game.state
+    context['game_round_state'] = game.round_state
+    if request.method == 'POST':
+        if request.POST.get('type') == "letsgo":
+            game.start()
+            game.set_current_player(player)
+            game.save()
+        elif request.POST.get('type') == "submit_text":
+            game.play_prompt(player, request.POST['prompt'])
+            game.save()
     return render(request, 'play.html', context=context)
 
 

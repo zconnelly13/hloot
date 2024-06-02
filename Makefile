@@ -15,3 +15,6 @@ shell:
 
 test:
 	python3 manage.py test game
+
+fe:
+	cd frontend && npm start

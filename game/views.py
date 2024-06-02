@@ -1,49 +1,80 @@
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.shortcuts import render
+from django.db.utils import IntegrityError
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from game.models import Game
 from game.models import Player
 
 
-def host(request):
+@api_view(['POST'])
+def create_game(request):
     game = Game()
     game.save()
-    return redirect(game.url())
+    return Response({'game_code': game.code}, status=201)
 
 
-def game(request, code):
+@api_view(['GET'])
+def state(request, code):
     game = Game.objects.get(code=code)
-    game.save()
-    context = {}
-    context['code'] = code
-    context['players'] = game.get_players()
-    context['game'] = game
-    return render(request, 'game.html', context=context)
+    return Response(game.full_state(), status=200)
 
 
-def play(request, code):
-    game = Game.objects.get(code=code)
-    context = {}
-    context['code'] = code
-    player, _ = Player.objects.get_or_create(name=request.GET['name'], game=game)
-    context['player'] = player
-    context['has_sufficient_players'] = game.has_sufficient_players()
-    context['game_is_started'] = game.has_started()
-    context['is_main_player'] = game.current_player == player
-    context['current_player'] = game.current_player.name
-    context['game_state'] = game.state
-    context['game_round_state'] = game.round_state
-    if request.method == 'POST':
-        if request.POST.get('type') == "letsgo":
-            game.start()
-            game.set_current_player(player)
-            game.save()
-        elif request.POST.get('type') == "submit_text":
-            game.play_prompt(player, request.POST['prompt'])
-            game.save()
-    return render(request, 'play.html', context=context)
+@api_view(['POST'])
+def join_game(request):
+    game = Game.objects.get(code=request.POST.get('game_code'))
+    name = request.POST.get('name')
+    try:
+        player = Player(name=name, game=game)
+        player.save()
+    except IntegrityError:
+        return Response({'error': 'Name already taken'}, status=400)
+    return Response(game.full_state(), status=200)
 
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the game index.")
+@api_view(['POST'])
+def lets_go(request):
+    game_code = request.POST.get('game_code')
+    player_name = request.POST.get('name')
+    game = Game.objects.get(code=game_code)
+    game.set_current_player(Player.objects.get(name=player_name, game=game))
+    game.start()
+    return Response(game.full_state(), status=200)
+
+
+@api_view(['POST'])
+def submit_prompt(request):
+    game_code = request.POST.get('game_code')
+    player_name = request.POST.get('name')
+    prompt = request.POST.get('prompt')
+    game = Game.objects.get(code=game_code)
+    player = Player.objects.get(name=player_name, game=game)
+    game.play_prompt(player, prompt)
+    return Response(game.full_state(), status=200)
+
+
+@api_view(['POST'])
+def submit_guess(request):
+    game_code = request.POST.get('game_code')
+    player_name = request.POST.get('name')
+    guess = request.POST.get('guess')
+    game = Game.objects.get(code=game_code)
+    player = Player.objects.get(name=player_name, game=game)
+    game.play_guess(player, guess)
+    return Response(game.full_state(), status=200)
+
+
+@api_view(['POST'])
+def next_round(request):
+    game_code = request.POST.get('game_code')
+    game = Game.objects.get(code=game_code)
+    game.next_round()
+    return Response(game.full_state(), status=200)
+
+
+@api_view(['POST'])
+def change_display_image(request):
+    game_code = request.POST.get('game_code')
+    image_id = request.POST.get('image_id')
+    game = Game.objects.get(code=game_code)
+    game.change_display_image(image_id)
+    return Response(game.full_state(), status=200)

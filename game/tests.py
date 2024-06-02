@@ -1,13 +1,227 @@
-from django.test import TestCase
 from django.db.utils import IntegrityError
-
+from django.test import Client
+from django.test import TestCase
+from django.urls import reverse
 
 from game.models import Game
 from game.models import Image
 from game.models import Player
 
 
+class TestViews(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_create_game(self):
+        response = self.client.post(reverse('create_game'))
+        self.assertIsNotNone(response.data.get('game_code'))
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Game.objects.count(), 1)
+
+    def test_create_player(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Player.objects.count(), 1)
+
+    def test_create_two_players_with_same_name(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Game.objects.count(), 1)
+        self.assertEqual(Player.objects.count(), 1)
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        self.assertEqual(response.status_code, 400)
+
+    def test_lets_go(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Sarah'})
+        response = self.client.post(reverse('lets_go'), {'game_code': '1234', 'name': 'Zac'})
+        self.assertEqual(response.status_code, 200)
+
+        game.refresh_from_db()
+        self.assertEqual(Game.objects.count(), 1)
+        self.assertEqual(Player.objects.count(), 2)
+        self.assertEqual(game.state, Game.State.PLAYING)
+
+    def test_submit_prompt(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Sarah'})
+        response = self.client.post(reverse('lets_go'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(
+            reverse('submit_prompt'),
+            {'game_code': '1234', 'name': 'Zac', 'prompt': 'Dogs playing poker.'}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        game.refresh_from_db()
+        self.assertEqual(Image.objects.count(), 1)
+        self.assertEqual(game.round_state, Game.RoundState.IMAGE_GENERATION)
+
+    def test_submit_guess(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Sarah'})
+        response = self.client.post(reverse('lets_go'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(
+            reverse('submit_prompt'),
+            {'game_code': '1234', 'name': 'Zac', 'prompt': 'Dogs playing poker.'}
+        )
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        game.refresh_from_db()
+        self.assertEqual(Image.objects.count(), 2)
+        self.assertEqual(game.round_state, Game.RoundState.GUESSING)
+
+    def test_enter_presenting_state(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Sarah'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Mark'})
+        response = self.client.post(reverse('lets_go'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(
+            reverse('submit_prompt'),
+            {'game_code': '1234', 'name': 'Zac', 'prompt': 'Dogs playing poker.'}
+        )
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
+        )
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Mark', 'guess': 'Animals playing cards.'}
+        )
+        self.assertEqual(response.status_code, 200)
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        game.game_loop()
+        game.refresh_from_db()
+        self.assertEqual(game.round_state, Game.RoundState.PRESENTING)
+
+    def test_next_round(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Sarah'})
+        response = self.client.post(reverse('lets_go'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(
+            reverse('submit_prompt'),
+            {'game_code': '1234', 'name': 'Zac', 'prompt': 'Dogs playing poker.'}
+        )
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
+        )
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
+        )
+        self.assertEqual(response.status_code, 200)
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        game.game_loop()
+        game.refresh_from_db()
+        response = self.client.post(
+            reverse('next_round'),
+            {'game_code': '1234', 'name': 'Zac'},
+        )
+        game.refresh_from_db()
+        self.assertEqual(game.round_state, Game.RoundState.PROMPT)
+        self.assertEqual(game.current_round, 2)
+        self.assertEqual(game.current_player, Player.objects.get(name='Sarah'))
+
+    def test_change_display_image(self):
+        game = Game(code='1234')
+        game.save()
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Sarah'})
+        response = self.client.post(reverse('join_game'), {'game_code': '1234', 'name': 'Mark'})
+        response = self.client.post(reverse('lets_go'), {'game_code': '1234', 'name': 'Zac'})
+        response = self.client.post(
+            reverse('submit_prompt'),
+            {'game_code': '1234', 'name': 'Zac', 'prompt': 'Dogs playing poker.'}
+        )
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
+        )
+        response = self.client.post(
+            reverse('submit_guess'),
+            {'game_code': '1234', 'name': 'Mark', 'guess': 'Animals playing cards.'}
+        )
+        self.assertEqual(response.status_code, 200)
+        game.refresh_from_db()
+        game.game_loop()
+        game.game_loop()
+        game.game_loop()
+        game.refresh_from_db()
+        self.assertEqual(game.round_state, Game.RoundState.PRESENTING)
+        response = self.client.post(
+            reverse('change_display_image'),
+            {'game_code': '1234', 'name': 'Zac', 'image_id': 1},
+        )
+        self.assertEqual(response.status_code, 200)
+        game.refresh_from_db()
+        self.assertEqual(game.display_image, Image.objects.get(id=1))
+
+
 class TestGameCreation(TestCase):
+    def test_full_state(self):
+        game = Game(code='1234')
+        game.save()
+        p1 = Player(name='Zac', game=game)
+        p2 = Player(name='Sarah', game=game)
+        p1.save()
+        p2.save()
+        game.set_current_player(p1)
+        game.start()
+        full_state = game.full_state()
+        self.assertEqual(full_state.get('code'), '1234')
+        self.assertEqual(full_state.get('state'), 'PLAYING')
+        self.assertEqual(full_state.get('round_state'), 'PROMPT')
+        self.assertEqual(full_state.get('current_round'), 1)
+        self.assertEqual(full_state.get('current_player'), 'Zac')
+        self.assertEqual(full_state.get('players'), ['Zac', 'Sarah'])
+        self.assertEqual(full_state.get('images'), [])
+
+        game.play_prompt(p1, 'Dogs playing poker.')
+        game.game_loop()
+        image = game.full_state().get('images')[0]
+        self.assertEqual(image.get('player'), 'Zac')
+        self.assertEqual(image.get('prompt'), 'Dogs playing poker.')
+        self.assertEqual(image.get('status'), 'PENDING')
+        self.assertEqual(image.get('round'), 1)
+        game.game_loop()
+        self.assertEqual(game.full_state().get('round_state'), 'GUESSING')
+        image = game.full_state().get('images')[0]
+        self.assertEqual(image.get('status'), 'COMPLETED')
+
     def test_create_game_random_code(self):
         # Create a game with a random code
         game = Game()
@@ -79,7 +293,6 @@ class TestPlayerCreation(TestCase):
         game = Game(code='1234')
         player = Player(name='Zac', game=game)
         self.assertEqual(player.name, 'Zac')
-        self.assertEqual(player.score, 0)
 
     def test_create_player_with_empty_name(self):
         # Create a player with an empty name
@@ -94,6 +307,26 @@ class TestPlayerCreation(TestCase):
 
 
 class TestGamePlay(TestCase):
+    def test_game_loop_doesnt_advance_too_far(self):
+        game = Game(code='1234')
+        game.save()
+        p1 = Player(name='Zac', game=game)
+        p2 = Player(name='Sarah', game=game)
+        p1.save()
+        p2.save()
+        game.start()
+        self.assertEqual(game.round_state, Game.RoundState.PROMPT)
+        game.set_current_player(p1)
+        game.play_prompt(p1, 'Dogs playing poker.')
+        self.assertEqual(game.round_state, Game.RoundState.IMAGE_GENERATION)
+        game.game_loop()
+        game.game_loop()
+        self.assertEqual(game.round_state, Game.RoundState.GUESSING)
+        game.game_loop()
+        game.game_loop()
+        game.game_loop()
+        self.assertEqual(game.round_state, Game.RoundState.GUESSING)
+
     def test_one_round(self):
         game = Game(code='1234')
         game.save()
@@ -123,27 +356,12 @@ class TestGamePlay(TestCase):
         game.play_guess(p3, 'Animals playing cards.')
         game.game_loop()
         game.game_loop()
-        self.assertEqual(game.round_state, Game.RoundState.VOTING)
-        """
-        game.select_image_version(p1, 0)
-        self.assertEqual(game.round_state, Game.RoundState.GUESSING)
-        game.game_loop()
-        self.assertEqual(game.round_state, Game.RoundState.GUESSING)
-        game.select_image_version(p2, 0)
-        self.assertEqual(game.round_state, Game.RoundState.GUESSING)
-        game.select_image_version(p3, 0)
-        """
-        self.assertEqual(game.round_state, Game.RoundState.VOTING)
-        game.game_loop()
-        self.assertEqual(game.round_state, Game.RoundState.VOTING)
-        game.play_vote(p1, p2)
-        self.assertEqual(game.round_state, Game.RoundState.VOTING)
-        game.play_vote(p2, p3)
-        game.play_vote(p3, p3)
+        self.assertEqual(game.round_state, Game.RoundState.PRESENTING)
 
-        self.assertEqual(p1.score, 0)
-        self.assertEqual(p2.score, 1)
-        self.assertEqual(p3.score, 2)
+        game.next_round()
+        self.assertEqual(game.round_state, Game.RoundState.PROMPT)
+        self.assertEqual(game.state, Game.State.PLAYING)
+        self.assertEqual(game.current_player, p2)
 
     def test_only_current_player_can_play_prompt(self):
         game = Game(code='1234')
@@ -160,6 +378,18 @@ class TestGamePlay(TestCase):
 
 
 class TestImageGeneration(TestCase):
+    def test_is_done(self):
+        g = Game(code='1234')
+        g.save()
+        p = Player(name='Zac', game=g)
+        p.save()
+        image = Image(prompt='Dogs playing poker.', game=g, player=p, round=0)
+        self.assertFalse(image.is_done())
+        image.generate()
+        self.assertFalse(image.is_done())
+        image.check_completed()
+        self.assertTrue(image.is_done())
+
     def test_generate_image(self):
         g = Game(code='1234')
         g.save()

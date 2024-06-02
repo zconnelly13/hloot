@@ -13,7 +13,7 @@ class Game(models.Model):
         PROMPT = 'PROMPT'
         IMAGE_GENERATION = 'IMAGE_GENERATION'
         GUESSING = 'GUESSING'
-        VOTING = 'VOTING'
+        PRESENTING = 'PRESENTING'
 
     code = models.CharField(max_length=4, unique=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.WAITING)
@@ -26,6 +26,13 @@ class Game(models.Model):
     )
     round_state = models.CharField(max_length=20, choices=RoundState.choices, default=RoundState.PROMPT)
     current_round = models.IntegerField(default=1)
+    display_image = models.ForeignKey(
+        'Image',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='display_image',
+    )
 
     def __str__(self):
         return f'Game {self.code}'
@@ -39,31 +46,36 @@ class Game(models.Model):
         if not self.code.isdigit():
             raise ValueError('Game code must be a number.')
 
+    def change_display_image(self, image_id):
+        image = Image.objects.get(id=image_id)
+        self.display_image = image
+        self.save()
+
+    def full_state(self):
+        full_state = {}
+        full_state['code'] = self.code
+        full_state['state'] = self.state
+        full_state['round_state'] = self.round_state
+        full_state['current_round'] = self.current_round
+        full_state['current_player'] = self.current_player.name if self.current_player else None
+        full_state['players'] = [player.name for player in self.get_players()]
+        full_state['images'] = [image.to_dict() for image in Image.objects.filter(game=self)]
+        return full_state
+
     def game_loop(self):
-        images = Image.objects.filter(game=self)
+        images = Image.objects.filter(game=self, round=self.current_round)
         if len(images) == 0:
             return
 
         for image in images:
-            if image.status == Image.Status.NOT_STARTED:
-                image.generate()
-            elif image.status == Image.Status.PENDING:
-                image.check_completed()
+            image.process()
 
-        if all([image.status == Image.Status.COMPLETED for image in images]):
+        if all([image.is_done() for image in images]):
             if self.round_state == Game.RoundState.IMAGE_GENERATION:
                 self.round_state = Game.RoundState.GUESSING
-            elif self.round_state == Game.RoundState.GUESSING:
-                self.round_state = Game.RoundState.VOTING
-
-    def play_vote(self, player, votee):
-        if self.state != Game.State.PLAYING:
-            raise ValueError('Game is not currently playing.')
-        if self.round_state != Game.RoundState.VOTING:
-            raise ValueError('It is not the voting phase.')
-
-        votee.score += 1
-        votee.save()
+            elif self.round_state == Game.RoundState.GUESSING and len(images) > 1:
+                self.round_state = Game.RoundState.PRESENTING
+        self.save()
 
     def play_prompt(self, player, prompt):
         if self.state != Game.State.PLAYING:
@@ -100,18 +112,32 @@ class Game(models.Model):
         if not self.has_sufficient_players():
             raise ValueError('Not enough players to start the game.')
         self.state = Game.State.PLAYING
+        self.round_state = Game.RoundState.PROMPT
         self.save()
 
     def url(self):
         return f'/game/{self.code}'
 
     def get_players(self):
-        return Player.objects.filter(game=self)
+        return Player.objects.filter(game=self).order_by('id')
+
+    def next_player(self):
+        players = self.get_players()
+        players = list(players)
+        current_index = players.index(self.current_player)
+        next_index = (current_index + 1) % len(players)
+        self.current_player = players[next_index]
+        self.save()
+
+    def next_round(self):
+        self.round_state = Game.RoundState.PROMPT
+        self.next_player()
+        self.current_round += 1
+        self.save()
 
 
 class Player(models.Model):
     name = models.CharField(max_length=30)
-    score = models.IntegerField(default=0)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
 
     class Meta:
@@ -122,7 +148,6 @@ class Player(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.score = 0
         if self.name == '':
             raise ValueError('Player name cannot be empty.')
 
@@ -154,7 +179,25 @@ class Image(models.Model):
         super().__init__(*args, **kwargs)
 
     def __str__(self):
-        return f'Image {self.url}'
+        return f'Image {self.prompt}, Status: {self.status}'
+
+    def is_done(self):
+        return self.status == Image.Status.COMPLETED
+
+    def to_dict(self):
+        return {
+            'player': self.player.name,
+            'prompt': self.prompt,
+            'selection': self.selection,
+            'status': self.status,
+            'round': self.round,
+        }
+
+    def process(self):
+        if self.status == Image.Status.NOT_STARTED:
+            self.generate()
+        elif self.status == Image.Status.PENDING:
+            self.check_completed()
 
     def generate(self):
         # TODO: Actually call midjourney API

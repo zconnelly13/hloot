@@ -209,8 +209,6 @@ class Image(models.Model):
     def generate(self):
         # Note: Do not do this mock this out properly ffs
         if settings.TESTING:
-            import time
-            time.sleep(2)
             self.external_id = '1234'
             self.status = Image.Status.PENDING
             self.save()
@@ -245,9 +243,8 @@ class Image(models.Model):
                 self.save()
 
     def check_completed(self):
-        if settings.TESTING or True:
-            import time
-            time.sleep(2)
+        # Note: Do not do this mock this out properly ffs
+        if settings.TESTING:
             self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'
             self.status = Image.Status.COMPLETED
             self.save()

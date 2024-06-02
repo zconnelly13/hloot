@@ -1,6 +1,10 @@
+import http.client
+import json
 import random
 
+from django.conf import settings
 from django.db import models
+from django.db import transaction
 
 
 class Game(models.Model):
@@ -134,7 +138,7 @@ class Game(models.Model):
     def next_round(self):
         self.round_state = Game.RoundState.PROMPT
         self.next_player()
-        self.current_round += 1
+        self.current_round = self.current_round + 1
         self.save()
 
 
@@ -203,17 +207,80 @@ class Image(models.Model):
             self.check_completed()
 
     def generate(self):
-        # TODO: Actually call midjourney API
-        self.external_id = '1234'
+        # Note: Do not do this mock this out properly ffs
+        if settings.TESTING:
+            import time
+            time.sleep(2)
+            self.external_id = '1234'
+            self.status = Image.Status.PENDING
+            self.save()
+            return
 
-        # Real Code
-        self.status = Image.Status.PENDING
-        self.save()
+        # This is also not good to do here it should be done in celery or something
+        with transaction.atomic():
+            if self.status == Image.Status.NOT_STARTED:
+                try:
+                    Image.objects.get(id=self.id, status=Image.Status.NOT_STARTED)
+                except Image.DoesNotExist:
+                    return
+                self.status = Image.Status.PENDING
+                self.save()
+
+                data = {
+                    "prompt": f"{self.prompt} --ar 1:1"
+                }
+
+                headers = {
+                    'Authorization': f'Bearer {settings.MIDJOURNEY_API_KEY}',
+                    'Content-Type': 'application/json'
+                }
+
+                conn = http.client.HTTPSConnection("cl.imagineapi.dev")
+                conn.request("POST", "/items/images/", body=json.dumps(data), headers=headers)
+
+                response = conn.getresponse()
+                response_data = json.loads(response.read().decode('utf-8'))
+
+                self.external_id = response_data['data']['id']
+                self.save()
 
     def check_completed(self):
-        # TODO: Actually call midjourney API
-        self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'
+        if settings.TESTING or True:
+            import time
+            time.sleep(2)
+            self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'
+            self.status = Image.Status.COMPLETED
+            self.save()
+            return
 
-        # Real Code
-        self.status = Image.Status.COMPLETED
-        self.save()
+        with transaction.atomic():
+            if self.status == Image.Status.PENDING:
+                try:
+                    Image.objects.get(id=self.id, status=Image.Status.PENDING)
+                except Image.DoesNotExist:
+                    return
+
+                headers = {
+                    'Authorization': f'Bearer {settings.MIDJOURNEY_API_KEY}',
+                    'Content-Type': 'application/json'
+                }
+
+                conn = http.client.HTTPSConnection("cl.imagineapi.dev")
+                conn.request("GET", f"/items/images/{self.external_id}", headers=headers)
+
+                response = conn.getresponse()
+                response_data = json.loads(response.read().decode('utf-8'))
+
+                if response_data['data']['status'] in ['pending', 'in-progress']:
+                    # Chill, Mary.
+                    return
+
+                if response_data['data']['status'] == 'completed':
+                    self.selection = response_data['data']['upscaled_urls'][0]
+                    self.status = Image.Status.COMPLETED
+                    self.save()
+
+                if response_data['data']['status'] == 'failed':
+                    self.selection = "https://media.istockphoto.com/id/1435353899/vector/pixel-censored-sign-vector-censorship-spot-on-transparent-background.jpg?s=1024x1024&w=is&k=20&c=WrFcwIR0GkoDX14FauoIp2mRNsJLvUczLJFfGRH6Eg8="  # noqa: E501
+                    self.status = Image.Status.COMPLETED
+                    self.save()

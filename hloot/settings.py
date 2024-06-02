@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import sys
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -134,3 +135,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 TESTING = sys.argv[1:2] == ['test']
+
+MIDJOURNEY_API_KEY = os.environ.get("MIDJOURNEY_API_KEY")
+if MIDJOURNEY_API_KEY is None:
+    raise ValueError("MIDJOURNEY_API_KEY environment variable must be set")

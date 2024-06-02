@@ -18,3 +18,6 @@ test:
 
 fe:
 	cd frontend && npm start
+
+gameloop:
+	python3 manage.py shell < game/game_loop.py

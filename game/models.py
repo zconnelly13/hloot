@@ -69,19 +69,45 @@ class Game(models.Model):
         return full_state
 
     def game_loop(self):
-        images = Image.objects.filter(game=self, round=self.current_round)
+        images = Image.objects.filter(
+            game=self,
+            round=self.current_round,
+            status__in=[Image.Status.NOT_STARTED, Image.Status.PENDING],
+        )
+
         if len(images) == 0:
             return
 
         for image in images:
             image.process()
 
-        if all([image.is_done() for image in images]):
+        all_images = Image.objects.filter(
+            game=self,
+            round=self.current_round,
+            status__in=[Image.Status.NOT_STARTED, Image.Status.PENDING],
+        )
+
+        if all([image.is_done() for image in all_images]):
             if self.round_state == Game.RoundState.IMAGE_GENERATION:
-                self.round_state = Game.RoundState.GUESSING
-            elif self.round_state == Game.RoundState.GUESSING and len(images) > 1:
-                self.round_state = Game.RoundState.PRESENTING
-        self.save()
+                try:
+                    Game.objects.filter(
+                        id=self.id,
+                        round_state=Game.RoundState.IMAGE_GENERATION,
+                    ).update(
+                        round_state=Game.RoundState.GUESSING,
+                    )
+                except Game.DoesNotExist:
+                    pass
+            elif self.round_state == Game.RoundState.GUESSING and len(all_images) == len(self.get_players()):
+                try:
+                    Game.objects.filter(
+                        id=self.id,
+                        round_state=Game.RoundState.GUESSING,
+                    ).update(
+                        round_state=Game.RoundState.PRESENTING,
+                    )
+                except Game.DoesNotExist:
+                    pass
 
     def play_prompt(self, player, prompt):
         if self.state != Game.State.PLAYING:
@@ -208,7 +234,7 @@ class Image(models.Model):
 
     def generate(self):
         # Note: Do not do this mock this out properly ffs
-        if settings.TESTING:
+        if settings.TESTING or True:
             self.external_id = '1234'
             self.status = Image.Status.PENDING
             self.save()
@@ -238,13 +264,14 @@ class Image(models.Model):
 
                 response = conn.getresponse()
                 response_data = json.loads(response.read().decode('utf-8'))
+                print(response_data)
 
                 self.external_id = response_data['data']['id']
                 self.save()
 
     def check_completed(self):
         # Note: Do not do this mock this out properly ffs
-        if settings.TESTING:
+        if settings.TESTING or True:
             self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'
             self.status = Image.Status.COMPLETED
             self.save()
@@ -267,6 +294,7 @@ class Image(models.Model):
 
                 response = conn.getresponse()
                 response_data = json.loads(response.read().decode('utf-8'))
+                print(response_data)
 
                 if response_data['data']['status'] in ['pending', 'in-progress']:
                     # Chill, Mary.

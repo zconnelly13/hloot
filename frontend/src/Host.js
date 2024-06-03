@@ -56,7 +56,6 @@ function Host() {
       <center>
         {gameDetails && gameDetails.state === 'WAITING' && (
           <>
-            <h2 style={styles.gameCodeLabel}>Game Code</h2>
             <h1 style={styles.gameCode}>{gameCode}</h1>
             <div style={styles.waitingContainer}>
               <h2 style={styles.waitingText}>Waiting for players...</h2>
@@ -71,12 +70,16 @@ function Host() {
           </>
         )}
         {gameDetails && gameDetails.state === 'PLAYING' && (
-          <div style={styles.messageContainer}>
+          <div>
             {gameDetails.round_state === 'PROMPT' && (
-              <h2 style={styles.highlightedText}>{gameDetails.current_player}'s turn</h2>
+              <div style={styles.messageContainer}>
+                <h2 style={styles.highlightedText}>{gameDetails.current_player}'s turn</h2>
+              </div>
             )}
             {gameDetails.round_state === 'IMAGE_GENERATION' && (
-              <h2 style={styles.highlightedText}>Generating...</h2>
+              <div style={styles.messageContainer}>
+                <h2 style={styles.highlightedText}>Generating...</h2>
+              </div>
             )}
             {gameDetails.round_state === 'GUESSING' && (
               <div style={styles.polaroid}>
@@ -119,6 +122,8 @@ function Host() {
 
 const styles = {
   container: {
+    background: "url('https://cl.imagineapi.dev/assets/7ca88a00-35e3-4b39-81c1-c76c6e204e36.png') no-repeat center center fixed",
+    backgroundSize: 'cover',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -126,7 +131,6 @@ const styles = {
     height: '100vh',
     backgroundColor: '#f7f0f0',
     fontFamily: 'Arial, sans-serif',
-    padding: '2rem',
   },
   gameCodeLabel: {
     fontSize: '2rem',
@@ -135,18 +139,20 @@ const styles = {
   },
   gameCode: {
     fontSize: '8rem',
-    color: '#333',
+    color: 'white',
+    webkitTextStroke: '1px black',
     marginBottom: '2rem',
   },
   waitingContainer: {
-    backgroundColor: '#ffefd5',
+    backdropFilter: 'blur(15px)',
     padding: '2rem',
     borderRadius: '8px',
-    border: '2px solid #ffdead',
+    border: '2px',
   },
   waitingText: {
     fontSize: '3rem',
-    color: '#333',
+    color: 'white',
+    webkitTextStroke: '1px black',
     marginBottom: '2rem',
   },
   playersList: {
@@ -155,20 +161,19 @@ const styles = {
   },
   playerItem: {
     fontSize: '2.5rem',
-    color: '#555',
+    color: 'white',
     padding: '1rem 0',
   },
   messageContainer: {
-    backgroundColor: '#ffb6c1',
+    backdropFilter: 'blur(15px)',
     padding: '2rem',
     borderRadius: '8px',
-    border: '2px solid #ff91a4',
     textAlign: 'center',
+    webkitTextStroke: '1px #ccc',
   },
   highlightedText: {
     fontSize: '3rem',
     color: '#fff',
-    textShadow: '1px 1px 3px #000',
     marginBottom: '2rem',
   },
   polaroid: {

@@ -166,7 +166,10 @@ const styles = {
   },
   messageContainer: {
     backdropFilter: 'blur(15px)',
-    padding: '2rem',
+    paddingTop: '1vh',
+    paddingBottom: '1vh',
+    paddingLeft: '7vw',
+    paddingRight: '7vw',
     borderRadius: '8px',
     textAlign: 'center',
     webkitTextStroke: '1px #ccc',
@@ -193,7 +196,7 @@ const styles = {
   },
   caption: {
     marginTop: '1rem',
-    fontSize: '1.5rem',
+    fontSize: '1rem',
     color: '#555',
     minHeight: '50px',
     maxHeight: '100px',

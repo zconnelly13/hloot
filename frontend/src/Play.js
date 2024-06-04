@@ -192,7 +192,7 @@ function Play() {
               ) : gameDetails.round_state === 'IMAGE_GENERATION' ? (
                 <p style={styles.highlightedText}>Generating...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.images.find(image => image.round === gameDetails.current_round && image.player === name) ? (
-                <p style={styles.highlightedText}>Generating...</p>
+                <p style={styles.highlightedText}>Relax...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.current_player !== name ? (
                 <div>
                   <textarea
@@ -238,7 +238,7 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100vh',
+    minHeight: '100vh',
     background: "url('https://cl.imagineapi.dev/assets/7ca88a00-35e3-4b39-81c1-c76c6e204e36.png') no-repeat center center fixed",
     fontFamily: 'Arial, sans-serif',
     padding: '2rem',
@@ -285,7 +285,7 @@ const styles = {
     height: '100px',
   },
   highlightedText: {
-    fontSize: '3rem',
+    fontSize: '2rem',
     color: '#fff',
     textShadow: '1px 1px 3px #000',
     marginBottom: '2rem',
@@ -315,7 +315,7 @@ const styles = {
   },
   caption: {
     marginTop: '1rem',
-    fontSize: '1.5rem',
+    fontSize: '1rem',
     color: '#555',
     minHeight: '50px',
     maxHeight: '100px',

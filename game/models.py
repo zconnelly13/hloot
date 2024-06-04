@@ -19,6 +19,7 @@ class Game(models.Model):
         GUESSING = 'GUESSING'
         PRESENTING = 'PRESENTING'
 
+    created_at = models.DateTimeField(auto_now_add=True)
     code = models.CharField(max_length=4, unique=True)
     state = models.CharField(max_length=20, choices=State.choices, default=State.WAITING)
     current_player = models.ForeignKey(

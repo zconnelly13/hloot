@@ -12,6 +12,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    env:
+      MIDJOURNEY_API_KEY: "<fake-api-key>"
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2

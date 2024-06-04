@@ -287,8 +287,12 @@ const styles = {
   highlightedText: {
     fontSize: '2rem',
     color: '#fff',
-    textShadow: '1px 1px 3px #000',
     marginBottom: '2rem',
+    backdropFilter: 'blur(15px)',
+    paddingTop: '1vh',
+    paddingBottom: '2vh',
+    paddingLeft: '7vw',
+    paddingRight: '7vw',
   },
   polaroid: {
     backgroundColor: 'white',

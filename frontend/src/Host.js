@@ -84,14 +84,14 @@ function Host() {
             {gameDetails.round_state === 'GUESSING' && (
               <div style={styles.polaroid}>
                 {gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round) && (
-                  <>
+                  <div style={styles.polaroidInner}>
                     <img
                       src={gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round).selection}
                       alt="Generated"
                       style={styles.largeImage}
                     />
                     <div style={styles.caption}></div>
-                  </>
+                  </div>
                 )}
               </div>
             )}
@@ -178,6 +178,7 @@ const styles = {
     fontSize: '3rem',
     color: '#fff',
     marginBottom: '2rem',
+    backdropFilter: 'blur(15px)',
   },
   polaroid: {
     backgroundColor: 'white',

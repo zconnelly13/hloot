@@ -38,6 +38,17 @@ function Host() {
           .then(response => {
             setGameDetails(response.data);
             console.log(response.data);
+            // if the game's round_state is presenting
+            // preload all the images for the current round
+
+            if (response.data.round_state === 'PRESENTING') {
+              response.data.images.sort((a, b) => a.id - b.id).forEach(image => {
+                if (image.round === response.data.current_round) {
+                  let img = new Image();
+                  img.src = image.selection;
+                }
+              });
+            }
           })
           .catch(error => {
             console.log(error);
@@ -45,7 +56,7 @@ function Host() {
       };
 
       fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 1000); // Poll every 1 second
+      interval = setInterval(fetchGameDetails, 250); // Poll every quarter second
     }
 
     return () => clearInterval(interval); // Clear interval on cleanup

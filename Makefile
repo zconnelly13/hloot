@@ -24,3 +24,9 @@ gameloop:
 
 lint:
 	flake8 game/ hloot/ 
+
+build:
+	docker build . -t hloot
+
+up:
+	docker-compose up --build

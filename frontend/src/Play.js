@@ -23,7 +23,7 @@ function Play() {
 
     if (newGameCode.length === 4) {
       setCodeEntered(true);
-      setSearchParams({ code: newGameCode, name });
+      setSearchParams({ page: 'play', code: newGameCode, name });
     }
   };
 
@@ -40,7 +40,7 @@ function Play() {
       .then(response => {
         setGameDetails(response.data);
         setJoined(true);
-        setSearchParams({ code: gameCode, name });
+        setSearchParams({ page: 'play', code: gameCode, name });
       })
       .catch(error => {
         console.log(error);

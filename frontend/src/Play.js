@@ -171,7 +171,7 @@ function Play() {
         </div>
       ) : (
         <div style={styles.inputContainer}>
-          <h2>Hloot</h2>
+          <h2 style={styles.waitingMessage}>Hloot</h2>
           {gameDetails && gameDetails.state === 'WAITING' && gameDetails.has_sufficient_players && (
             <button onClick={handleLetsGo} style={styles.button}>Let's Go</button>
           )}
@@ -183,7 +183,7 @@ function Play() {
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     style={styles.textarea}
-                    placeholder="Enter your prompt"
+                    placeholder="What'll it be?"
                   />
                   <button onClick={handleSubmitPrompt} style={styles.button}>Submit Prompt</button>
                 </div>
@@ -195,19 +195,11 @@ function Play() {
                 <p style={styles.highlightedText}>Generating...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.current_player !== name ? (
                 <div>
-                  <div style={styles.polaroid}>
-                    <img
-                      src={gameDetails.images.find(image => image.round === gameDetails.current_round).selection}
-                      alt="Generated"
-                      style={styles.largeImage}
-                    />
-                    <div style={styles.caption}></div>
-                  </div>
                   <textarea
                     value={guess}
                     onChange={(e) => setGuess(e.target.value)}
                     style={styles.textarea}
-                    placeholder="Enter your guess"
+                    placeholder="What's that?"
                   />
                   <button onClick={handleSubmitGuess} style={styles.button}>Submit Guess</button>
                 </div>
@@ -247,7 +239,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    backgroundColor: '#f7f0f0',
+    background: "url('https://cl.imagineapi.dev/assets/7ca88a00-35e3-4b39-81c1-c76c6e204e36.png') no-repeat center center fixed",
     fontFamily: 'Arial, sans-serif',
     padding: '2rem',
   },
@@ -255,10 +247,9 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#fff',
     padding: '2rem',
     borderRadius: '8px',
-    border: '2px solid #ddd',
+    fontSize: '2.5rem',
   },
   input: {
     fontSize: '1.5rem',
@@ -275,7 +266,8 @@ const styles = {
     padding: '0.5rem 1rem',
     borderRadius: '4px',
     border: 'none',
-    backgroundColor: '#007bff',
+    backgroundColor: 'transparent',
+    backdropFilter: 'blur(20px)',
     color: '#fff',
     cursor: 'pointer',
     width: '100%',
@@ -313,6 +305,13 @@ const styles = {
   largeImage: {
     width: '100%',
     height: 'auto',
+  },
+  waitingMessage: {
+    fontSize: '3rem',
+    color: 'white',
+    webkitTextStroke: '1px black',
+    paddingLeft: '2rem',
+    paddingRight: '2rem',
   },
   caption: {
     marginTop: '1rem',

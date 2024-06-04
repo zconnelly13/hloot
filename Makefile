@@ -21,3 +21,6 @@ fe:
 
 gameloop:
 	python3 manage.py shell < game/game_loop.py
+
+lint:
+	flake8 game/ hloot/ 

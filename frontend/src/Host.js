@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 function Host() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialGameCode = searchParams.get('code') || '';
@@ -11,12 +13,11 @@ function Host() {
 
   useEffect(() => {
     if (!gameCode && effectRan.current === false) {
-      axios.post('http://localhost:8000/game/create')
+      axios.post(`${API_BASE_URL}/game/create`)
         .then(response => {
           const newGameCode = response.data.game_code;
           setGameCode(newGameCode);
           setSearchParams({ code: newGameCode });
-          console.log(newGameCode);
         })
         .catch(error => {
           console.log(error);
@@ -34,13 +35,9 @@ function Host() {
     let interval;
     if (gameCode) {
       const fetchGameDetails = () => {
-        axios.get(`http://localhost:8000/game/state/${gameCode}`)
+        axios.get(`${API_BASE_URL}/game/state/${gameCode}`)
           .then(response => {
             setGameDetails(response.data);
-            console.log(response.data);
-            // if the game's round_state is presenting
-            // preload all the images for the current round
-
             if (response.data.round_state === 'PRESENTING') {
               response.data.images.sort((a, b) => a.id - b.id).forEach(image => {
                 if (image.round === response.data.current_round) {

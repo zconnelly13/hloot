@@ -152,6 +152,8 @@ class TestViews(TestCase):
             {'game_code': '1234', 'name': 'Zac'},
         )
         game.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(game.display_image)
         self.assertEqual(game.round_state, Game.RoundState.PROMPT)
         self.assertEqual(game.current_round, 2)
         self.assertEqual(game.current_player, Player.objects.get(name='Sarah'))

@@ -75,39 +75,31 @@ class Game(models.Model):
             status__in=[Image.Status.NOT_STARTED, Image.Status.PENDING],
         )
 
-        if len(images) == 0:
-            return
-
         for image in images:
             image.process()
 
-        all_images = Image.objects.filter(
+        done_images = Image.objects.filter(
             game=self,
             round=self.current_round,
-            status__in=[Image.Status.NOT_STARTED, Image.Status.PENDING],
+            status__in=[Image.Status.COMPLETED, Image.Status.ERROR],
         )
 
-        if all([image.is_done() for image in all_images]):
-            if self.round_state == Game.RoundState.IMAGE_GENERATION:
-                try:
-                    Game.objects.filter(
-                        id=self.id,
-                        round_state=Game.RoundState.IMAGE_GENERATION,
-                    ).update(
-                        round_state=Game.RoundState.GUESSING,
-                    )
-                except Game.DoesNotExist:
-                    pass
-            elif self.round_state == Game.RoundState.GUESSING and len(all_images) == len(self.get_players()):
-                try:
-                    Game.objects.filter(
-                        id=self.id,
-                        round_state=Game.RoundState.GUESSING,
-                    ).update(
-                        round_state=Game.RoundState.PRESENTING,
-                    )
-                except Game.DoesNotExist:
-                    pass
+        if self.round_state == Game.RoundState.IMAGE_GENERATION and len(done_images) == 1:
+            try:
+                with transaction.atomic():
+                    game = Game.objects.get(id=self.id, round_state=Game.RoundState.IMAGE_GENERATION)
+                    game.round_state = Game.RoundState.GUESSING
+                    game.save()
+            except Game.DoesNotExist:
+                pass
+        elif self.round_state == Game.RoundState.GUESSING and len(done_images) == self.player_count():
+            try:
+                with transaction.atomic():
+                    game = Game.objects.get(id=self.id, round_state=Game.RoundState.GUESSING)
+                    game.round_state = Game.RoundState.PRESENTING
+                    game.save()
+            except Game.DoesNotExist:
+                pass
 
     def play_prompt(self, player, prompt):
         if self.state != Game.State.PLAYING:
@@ -135,7 +127,7 @@ class Game(models.Model):
         self.save()
 
     def has_sufficient_players(self):
-        return self.get_players().count() >= 2
+        return self.player_count() >= 2
 
     def has_started(self):
         return self.state == Game.State.PLAYING
@@ -153,6 +145,9 @@ class Game(models.Model):
     def get_players(self):
         return Player.objects.filter(game=self).order_by('id')
 
+    def player_count(self):
+        return Player.objects.filter(game=self).count()
+
     def next_player(self):
         players = self.get_players()
         players = list(players)
@@ -165,6 +160,7 @@ class Game(models.Model):
         self.round_state = Game.RoundState.PROMPT
         self.next_player()
         self.current_round = self.current_round + 1
+        self.display_image = None
         self.save()
 
 

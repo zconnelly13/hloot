@@ -77,6 +77,7 @@ class TestViews(TestCase):
         game.refresh_from_db()
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         response = self.client.post(
             reverse('submit_guess'),
             {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
@@ -101,6 +102,7 @@ class TestViews(TestCase):
         game.refresh_from_db()
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         response = self.client.post(
             reverse('submit_guess'),
             {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
@@ -130,6 +132,7 @@ class TestViews(TestCase):
         game.refresh_from_db()
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         response = self.client.post(
             reverse('submit_guess'),
             {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
@@ -167,6 +170,7 @@ class TestViews(TestCase):
         game.refresh_from_db()
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         response = self.client.post(
             reverse('submit_guess'),
             {'game_code': '1234', 'name': 'Sarah', 'guess': 'Dogs playing cards.'}
@@ -213,12 +217,14 @@ class TestGameCreation(TestCase):
 
         game.play_prompt(p1, 'Dogs playing poker.')
         game.game_loop()
+        game.refresh_from_db()
         image = game.full_state().get('images')[0]
         self.assertEqual(image.get('player'), 'Zac')
         self.assertEqual(image.get('prompt'), 'Dogs playing poker.')
         self.assertEqual(image.get('status'), 'PENDING')
         self.assertEqual(image.get('round'), 1)
         game.game_loop()
+        game.refresh_from_db()
         self.assertEqual(game.full_state().get('round_state'), 'GUESSING')
         image = game.full_state().get('images')[0]
         self.assertEqual(image.get('status'), 'COMPLETED')
@@ -322,10 +328,12 @@ class TestGamePlay(TestCase):
         self.assertEqual(game.round_state, Game.RoundState.IMAGE_GENERATION)
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         self.assertEqual(game.round_state, Game.RoundState.GUESSING)
         game.game_loop()
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         self.assertEqual(game.round_state, Game.RoundState.GUESSING)
 
     def test_one_round(self):
@@ -350,13 +358,16 @@ class TestGamePlay(TestCase):
         self.assertEqual(game.round_state, Game.RoundState.IMAGE_GENERATION)
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         self.assertEqual(game.round_state, Game.RoundState.GUESSING)
         game.play_guess(p2, 'Dogs playing cards.')
         game.game_loop()
+        game.refresh_from_db()
         self.assertEqual(game.round_state, Game.RoundState.GUESSING)
         game.play_guess(p3, 'Animals playing cards.')
         game.game_loop()
         game.game_loop()
+        game.refresh_from_db()
         self.assertEqual(game.round_state, Game.RoundState.PRESENTING)
 
         game.next_round()

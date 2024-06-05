@@ -151,7 +151,7 @@ const styles = {
   gameCode: {
     fontSize: '8rem',
     color: 'white',
-    webkitTextStroke: '1px black',
+    WebkitTextStroke: '1px black',
     marginBottom: '2rem',
   },
   waitingContainer: {
@@ -163,7 +163,7 @@ const styles = {
   waitingText: {
     fontSize: '3rem',
     color: 'white',
-    webkitTextStroke: '1px black',
+    WebkitTextStroke: '1px black',
     marginBottom: '2rem',
   },
   playersList: {
@@ -183,7 +183,7 @@ const styles = {
     paddingRight: '7vw',
     borderRadius: '8px',
     textAlign: 'center',
-    webkitTextStroke: '1px #ccc',
+    WebkitTextStroke: '1px #ccc',
   },
   highlightedText: {
     fontSize: '3rem',

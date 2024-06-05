@@ -312,7 +312,7 @@ const styles = {
   waitingMessage: {
     fontSize: '3rem',
     color: 'white',
-    webkitTextStroke: '1px black',
+    WebkitTextStroke: '1px black',
     paddingLeft: '2rem',
     paddingRight: '2rem',
   },

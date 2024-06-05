@@ -108,10 +108,10 @@ class Game(models.Model):
         if player != self.current_player:
             raise ValueError('It is not this player\'s turn.')
 
-        image = Image(prompt=prompt, game=self, player=player, round=self.current_round)
-        image.save()
-        self.round_state = Game.RoundState.IMAGE_GENERATION
-        self.save()
+        image, created = Image.objects.get_or_create(prompt=prompt, game=self, player=player, round=self.current_round)
+        if created:
+            self.round_state = Game.RoundState.IMAGE_GENERATION
+            self.save()
 
     def play_guess(self, player, guess):
         if self.state != Game.State.PLAYING:
@@ -119,9 +119,7 @@ class Game(models.Model):
         if self.round_state != Game.RoundState.GUESSING:
             raise ValueError('It is not the guessing phase.')
 
-        image = Image(prompt=guess, game=self, player=player, round=self.current_round)
-        image.save()
-        self.save()
+        image, _ = Image.objects.get_or_create(prompt=guess, game=self, player=player, round=self.current_round)
 
     def set_current_player(self, player):
         self.current_player = player
@@ -291,7 +289,13 @@ class Image(models.Model):
 
                 response = conn.getresponse()
                 response_data = json.loads(response.read().decode('utf-8'))
+
                 print(response_data)
+
+                if response_data['error']:
+                    self.status = Image.Status.COMPLETED
+                    self.selection = "https://media.istockphoto.com/id/1435353899/vector/pixel-censored-sign-vector-censorship-spot-on-transparent-background.jpg?s=1024x1024&w=is&k=20&c=WrFcwIR0GkoDX14FauoIp2mRNsJLvUczLJFfGRH6Eg8="  # noqa: E501
+                    self.save()
 
                 if response_data['data']['status'] in ['pending', 'in-progress']:
                     # Chill, Mary.

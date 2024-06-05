@@ -138,7 +138,7 @@ function Play() {
       };
 
       fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 1000); // Poll every 1 second
+      interval = setInterval(fetchGameDetails, 5000); // Poll every 1 second
     }
 
     return () => clearInterval(interval); // Clear interval on cleanup
@@ -191,7 +191,7 @@ function Play() {
               ) : gameDetails.round_state === 'IMAGE_GENERATION' ? (
                 <p style={styles.highlightedText}>Generating...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.images.find(image => image.round === gameDetails.current_round && image.player === name) ? (
-                <p style={styles.highlightedText}></p>
+                <p></p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.current_player !== name ? (
                 <div>
                   <textarea
@@ -221,7 +221,7 @@ function Play() {
                   <button onClick={handleNextRound} style={styles.button}>Next Round</button>
                 </div>
               ) : (
-                <p style={styles.highlightedText}></p>
+                <p></p>
               )}
             </div>
           )}
@@ -239,6 +239,8 @@ const styles = {
     justifyContent: 'center',
     minHeight: '100vh',
     background: "url('https://cl.imagineapi.dev/assets/7ca88a00-35e3-4b39-81c1-c76c6e204e36.png') no-repeat center center fixed",
+    backgroundSize: 'cover',
+    backgroundColor: '#214a58',
     fontFamily: 'Arial, sans-serif',
     padding: '2rem',
   },
@@ -323,7 +325,7 @@ const styles = {
     fontSize: '1rem',
     color: '#555',
     minHeight: '50px',
-    maxHeight: '100px',
+    maxHeight: '150px',
     overflowY: 'auto',
     display: 'flex',
     alignItems: 'center',

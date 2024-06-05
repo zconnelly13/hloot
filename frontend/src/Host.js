@@ -38,17 +38,32 @@ function Host() {
   useEffect(() => {
     let interval;
     if (gameCode) {
+      let currentIntervalTime = 5000;
+      let intervalTime = 5000;
+      let quickIntervalTime = 250;
+
       const fetchGameDetails = () => {
         axios.get(`/game/state/${gameCode}`)
           .then(response => {
             setGameDetails(response.data);
             if (response.data.round_state === 'PRESENTING') {
+              if (currentIntervalTime !== quickIntervalTime) {
+                clearInterval(interval);
+                interval = setInterval(fetchGameDetails, quickIntervalTime); // Poll quickly while presenting
+                currentIntervalTime = quickIntervalTime;
+              }
               response.data.images.sort((a, b) => a.id - b.id).forEach(image => {
                 if (image.round === response.data.current_round) {
                   let img = new Image();
                   img.src = image.selection;
                 }
               });
+            } else if (response.data.round_state === 'PROMPT') {
+              if (currentIntervalTime !== intervalTime) {
+                clearInterval(interval);
+                interval = setInterval(fetchGameDetails, intervalTime); // Poll every 5 seconds while not presenting
+                currentIntervalTime = intervalTime;
+              }
             }
           })
           .catch(error => {
@@ -57,7 +72,7 @@ function Host() {
       };
 
       fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 1000); // Poll every quarter second
+      interval = setInterval(fetchGameDetails, intervalTime); // Poll every quarter second
     }
 
     return () => clearInterval(interval); // Clear interval on cleanup

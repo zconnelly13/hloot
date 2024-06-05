@@ -28,6 +28,9 @@ lint:
 build:
 	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} -t hloot .
 
+dev:
+	docker-compose --file docker-dev.yml up --build
+
 collectstatic:
 	python3 manage.py collectstatic
 
@@ -35,4 +38,4 @@ up:
 	docker-compose up
 
 proxy:
-	docker-compose --file docker-compose-nginx-dev.yml up
+	docker-compose --file docker-compose-nginx-dev.yml up --build

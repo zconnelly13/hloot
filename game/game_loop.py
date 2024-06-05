@@ -8,7 +8,7 @@ from game.models import Game
 while True:
     games = Game.objects.filter(
         state='PLAYING',
-        created_at__lte=timezone.now() - timedelta(hours=12)
+        created_at__gte=timezone.now() - timedelta(hours=12)
     )
     for game in games:
         game.game_loop()

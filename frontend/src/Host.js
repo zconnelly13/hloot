@@ -57,7 +57,7 @@ function Host() {
       };
 
       fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 250); // Poll every quarter second
+      interval = setInterval(fetchGameDetails, 1000); // Poll every quarter second
     }
 
     return () => clearInterval(interval); // Clear interval on cleanup
@@ -199,7 +199,7 @@ const styles = {
     borderRadius: '10px',
     display: 'inline-block',
     textAlign: 'center',
-    width: '80%',
+    width: '100%',
     maxWidth: '800px',
     marginTop: '2rem',
   },

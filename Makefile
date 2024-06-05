@@ -33,3 +33,6 @@ collectstatic:
 
 up:
 	docker-compose up --build
+
+proxy:
+	docker-compose --file docker-compose-nginx-dev.yml up

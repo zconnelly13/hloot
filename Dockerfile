@@ -34,8 +34,10 @@ RUN npm install --prefix /app/frontend
 RUN npm run build --prefix /app/frontend
 
 # Move the build files to the Django static directory
-RUN mkdir -p /app/staticfiles
+RUN mkdir -p /app/staticfiles/play/
+
 RUN cp -r build/* /app/staticfiles/
+RUN cp -r build/* /app/staticfiles/play/
 
 # Back to the app root
 WORKDIR /app

@@ -28,5 +28,8 @@ lint:
 build:
 	docker build . -t hloot
 
+collectstatic:
+	python3 manage.py collectstatic
+
 up:
 	docker-compose up --build

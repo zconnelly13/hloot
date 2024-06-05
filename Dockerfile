@@ -3,7 +3,7 @@ FROM python:3.10
 
 # Set build-time environment variables
 ARG MIDJOURNEY_API_KEY
-ARG REACT_APP_API_BASE_URL 
+ARG REACT_APP_API_BASE_URL
 
 # Set runtime environment variables
 ENV MIDJOURNEY_API_KEY=$MIDJOURNEY_API_KEY
@@ -27,6 +27,7 @@ RUN apt-get install -y nodejs
 
 # Copy application files
 COPY . /app/
+COPY .env /app/frontend/.env
 
 # Build the React frontend
 WORKDIR /app/frontend
@@ -35,7 +36,6 @@ RUN npm run build --prefix /app/frontend
 
 # Move the build files to the Django static directory
 RUN mkdir -p /app/staticfiles/play/
-
 RUN cp -r build/* /app/staticfiles/
 RUN cp -r build/* /app/staticfiles/play/
 

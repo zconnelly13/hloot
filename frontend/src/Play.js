@@ -4,6 +4,10 @@ import { useSearchParams } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+axios.defaults.headers.common["ngrok-skip-browser-warning"] = "133769";
+axios.defaults.baseURL = API_BASE_URL;
+
+
 function Play() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialGameCode = searchParams.get('code') || '';
@@ -36,7 +40,7 @@ function Play() {
     formData.append('game_code', gameCode);
     formData.append('name', name);
 
-    axios.post(`${API_BASE_URL}/game/join_game`, formData)
+    axios.post(`/game/join_game`, formData)
       .then(response => {
         setGameDetails(response.data);
         setJoined(true);
@@ -52,7 +56,7 @@ function Play() {
     formData.append('game_code', gameCode);
     formData.append('name', name);
 
-    axios.post(`${API_BASE_URL}/game/lets_go`, formData)
+    axios.post(`/game/lets_go`, formData)
       .then(response => {
         setGameDetails(response.data);
       })
@@ -67,7 +71,7 @@ function Play() {
     formData.append('name', name);
     formData.append('prompt', prompt);
 
-    axios.post(`${API_BASE_URL}/game/submit_prompt`, formData)
+    axios.post(`/game/submit_prompt`, formData)
       .then(response => {
         setGameDetails(response.data);
         setPrompt(''); // Clear the prompt textarea
@@ -83,7 +87,7 @@ function Play() {
     formData.append('name', name);
     formData.append('guess', guess);
 
-    axios.post(`${API_BASE_URL}/game/submit_guess`, formData)
+    axios.post(`/game/submit_guess`, formData)
       .then(response => {
         setGameDetails(response.data);
         setGuess(''); // Clear the guess textarea
@@ -98,7 +102,7 @@ function Play() {
     formData.append('game_code', gameCode);
     formData.append('image_id', imageId);
 
-    axios.post(`${API_BASE_URL}/game/change_display_image`, formData)
+    axios.post(`/game/change_display_image`, formData)
       .then(response => {
         setGameDetails(response.data);
       })
@@ -111,7 +115,7 @@ function Play() {
     const formData = new FormData();
     formData.append('game_code', gameCode);
 
-    axios.post(`${API_BASE_URL}/game/next_round`, formData)
+    axios.post(`/game/next_round`, formData)
       .then(response => {
         setGameDetails(response.data);
       })
@@ -124,7 +128,7 @@ function Play() {
     let interval;
     if (joined) {
       const fetchGameDetails = () => {
-        axios.get(`${API_BASE_URL}/game/state/${gameCode}`)
+        axios.get(`/game/state/${gameCode}`)
           .then(response => {
             setGameDetails(response.data);
           })

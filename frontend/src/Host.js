@@ -4,6 +4,9 @@ import { useSearchParams } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+axios.defaults.headers.common["ngrok-skip-browser-warning"] = "133769";
+axios.defaults.baseURL = API_BASE_URL;
+
 function Host() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialGameCode = searchParams.get('code') || '';
@@ -13,7 +16,7 @@ function Host() {
 
   useEffect(() => {
     if (!gameCode && effectRan.current === false) {
-      axios.post(`${API_BASE_URL}/game/create`)
+      axios.post(`/game/create`)
         .then(response => {
           const newGameCode = response.data.game_code;
           setGameCode(newGameCode);
@@ -35,7 +38,7 @@ function Host() {
     let interval;
     if (gameCode) {
       const fetchGameDetails = () => {
-        axios.get(`${API_BASE_URL}/game/state/${gameCode}`)
+        axios.get(`/game/state/${gameCode}`)
           .then(response => {
             setGameDetails(response.data);
             if (response.data.round_state === 'PRESENTING') {

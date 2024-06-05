@@ -26,13 +26,13 @@ lint:
 	flake8 game/ hloot/ 
 
 build:
-	docker build . -t hloot
+	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} -t hloot .
 
 collectstatic:
 	python3 manage.py collectstatic
 
 up:
-	docker-compose up --build
+	docker-compose up
 
 proxy:
 	docker-compose --file docker-compose-nginx-dev.yml up

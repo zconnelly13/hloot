@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
+import QRCodeSVG from 'qrcode.react';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -67,7 +68,8 @@ function Host() {
       <center>
         {gameDetails && gameDetails.state === 'WAITING' && (
           <>
-            <h1 style={styles.gameCode}>{gameCode}</h1>
+            <QRCodeSVG size="128" value={`${API_BASE_URL}/play?code=${gameCode}`} style={styles.qrCode} />
+            <h1 style={styles.gameCode}>Hloot</h1>
             <div style={styles.waitingContainer}>
               <h2 style={styles.waitingText}>Waiting for players...</h2>
               <ul style={styles.playersList}>
@@ -149,9 +151,9 @@ const styles = {
     marginBottom: '1rem',
   },
   gameCode: {
-    fontSize: '8rem',
+    fontSize: '4rem',
     color: 'white',
-    WebkitTextStroke: '1px black',
+    WebkitTextStroke: '1.5px black',
     marginBottom: '2rem',
   },
   waitingContainer: {
@@ -161,9 +163,8 @@ const styles = {
     border: '2px',
   },
   waitingText: {
-    fontSize: '3rem',
+    fontSize: '1rem',
     color: 'white',
-    WebkitTextStroke: '1px black',
     marginBottom: '2rem',
   },
   playersList: {
@@ -171,9 +172,9 @@ const styles = {
     padding: 0,
   },
   playerItem: {
-    fontSize: '2.5rem',
+    fontSize: '2rem',
     color: 'white',
-    padding: '1rem 0',
+    padding: '0',
   },
   messageContainer: {
     backdropFilter: 'blur(15px)',
@@ -217,6 +218,13 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '0.5rem',
+  },
+  qrCode: {
+    padding: '0.8rem',
+    backgroundColor: 'white',
+    backdropFilter: 'blur(15px)',
+    borderRadius: '10px',
+    marginBottom: '0rem',
   },
 };
 

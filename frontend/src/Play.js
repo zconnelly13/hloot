@@ -191,7 +191,7 @@ function Play() {
               ) : gameDetails.round_state === 'IMAGE_GENERATION' ? (
                 <p style={styles.highlightedText}>Generating...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.images.find(image => image.round === gameDetails.current_round && image.player === name) ? (
-                <p style={styles.highlightedText}>Relax...</p>
+                <p style={styles.highlightedText}></p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.current_player !== name ? (
                 <div>
                   <textarea
@@ -221,7 +221,7 @@ function Play() {
                   <button onClick={handleNextRound} style={styles.button}>Next Round</button>
                 </div>
               ) : (
-                <p style={styles.highlightedText}>Relax...</p>
+                <p style={styles.highlightedText}></p>
               )}
             </div>
           )}
@@ -287,11 +287,11 @@ const styles = {
   highlightedText: {
     fontSize: '2rem',
     color: '#fff',
-    marginBottom: '2rem',
     WebkitBackdropFilter: 'blur(15px)',
     backdropFilter: 'blur(15px)',
+    borderRadius: '8px',
     paddingTop: '1vh',
-    paddingBottom: '2vh',
+    paddingBottom: '1vh',
     paddingLeft: '7vw',
     paddingRight: '7vw',
   },

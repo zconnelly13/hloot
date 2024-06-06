@@ -4,7 +4,6 @@ import { useSearchParams } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-axios.defaults.headers.common["ngrok-skip-browser-warning"] = "133769";
 axios.defaults.baseURL = API_BASE_URL;
 
 

@@ -28,9 +28,6 @@ COPY . /app
 # Create a directory for the database
 RUN mkdir -p /app/db
 
-# Run migrations to initialize the database
-RUN python manage.py migrate
-
 # Set the default command
 ENTRYPOINT ["celery", "-A", "hloot"]
 CMD ["worker", "--beat", "--loglevel=info"]

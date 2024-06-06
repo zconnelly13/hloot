@@ -27,5 +27,4 @@ RUN mkdir -p /app/db
 # Run migrations
 RUN python manage.py migrate
 
-# Start the Django server and the continuous script loop
 CMD ["celery -A hloot worker --loglevel=info"]

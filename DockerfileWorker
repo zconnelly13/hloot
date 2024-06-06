@@ -30,4 +30,5 @@ RUN mkdir -p /app/db
 RUN python manage.py migrate
 
 # Set the default command
-ENTRYPOINT ["celery", "-A", "hloot", "worker", "--loglevel=info"]
+ENTRYPOINT ["celery", "-A", "hloot"]
+CMD ["worker", "--loglevel=info"]

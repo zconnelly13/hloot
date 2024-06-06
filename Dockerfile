@@ -22,8 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-# Back to the app root
-WORKDIR /app
+RUN mkdir -p /app/db
 
 # Run migrations
 RUN python manage.py migrate

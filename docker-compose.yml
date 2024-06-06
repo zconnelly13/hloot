@@ -9,12 +9,17 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - db:/app/db
       - .:/app
     environment:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
       - PYTHONPATH=/app
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
 
   celery:
     build:
@@ -24,14 +29,18 @@ services:
         REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL}
     command: celery -A hloot worker --beat --loglevel=info
     volumes:
-      - db:/app/db
       - .:/app
     environment:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
       - PYTHONPATH=/app
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=db
     depends_on:
       - web
+      - db
 
   frontend:
     build:
@@ -56,6 +65,15 @@ services:
     depends_on:
       - web
 
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
 volumes:
   staticfiles:
-  db:
+  postgres_data:

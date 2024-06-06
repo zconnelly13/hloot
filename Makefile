@@ -40,5 +40,8 @@ collectstatic:
 up:
 	docker-compose up
 
+prune:
+	docker system prune -a
+
 proxy:
 	docker-compose --file docker-compose-nginx-dev.yml up --build

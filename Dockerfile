@@ -16,16 +16,30 @@ ENV PYTHONUNBUFFERED=1
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy project files
 COPY . /app
 
-RUN mkdir -p /app/db
+# Create and set permissions for the db directory
+RUN mkdir -p /app/db && chown -R www-data:www-data /app/db
 
-# Run migrations
-RUN python manage.py migrate
+# Copy entrypoint script
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Set entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the web server by default
 CMD ["gunicorn", "hloot.wsgi:application", "--log-file", "-"]

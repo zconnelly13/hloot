@@ -67,7 +67,7 @@ jobs:
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
-        heroku ps:scale web=1 worker=1 beat=1 --app hloot
+        heroku ps:scale web=1 worker=1 --app hloot
 
   deploy-frontend:
     runs-on: ubuntu-22.04

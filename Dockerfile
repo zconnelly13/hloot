@@ -20,14 +20,13 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY . /app
+
 # Back to the app root
 WORKDIR /app
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
 
 # Run migrations
 RUN python manage.py migrate
 
 # Start the Django server and the continuous script loop
-CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8000 & python game/game_loop.py"]
+CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8000"]

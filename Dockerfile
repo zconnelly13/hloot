@@ -27,5 +27,5 @@ RUN mkdir -p /app/db
 # Run migrations
 RUN python manage.py migrate
 
-# Start the Django server and the continuous script loop
-CMD ["python3 manage.py runserver 0.0.0.0"]
+# Run the web server by default
+CMD ["gunicorn", "hloot.wsgi:application", "--log-file", "-"]

@@ -1,4 +1,4 @@
-name: CI, Tests, and Deploy to Heroku
+name: CI, Tests, and Deploy to both GH Pages and Heroku
 
 on:
   push:
@@ -67,3 +67,29 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
         heroku ps:scale web=1 worker=1 beat=1 --app hloot
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Build the React app
+        run: npm run build
+        working-directory: ./frontend
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/build

@@ -51,10 +51,14 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
 
-    - name: Build, tag, and push Docker image
+    - name: Build, tag, and push web
       run: |
-        docker build -t registry.heroku.com/hloot/web -t registry.heroku.com/hloot/worker .
+        docker build -t registry.heroku.com/hloot/web .
         docker push registry.heroku.com/hloot/web
+
+    - name: Build, tag, and push worker
+      run: |
+        docker build -t registry.heroku.com/hloot/worker -f DockerfileWorker .
         docker push registry.heroku.com/hloot/worker
 
     - name: Release the app

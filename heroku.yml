@@ -1,6 +1,8 @@
 build:
   docker:
     web: Dockerfile
+    release: Dockerfile
+    worker: DockerfileWorker
 run:
   web: sh -c "python manage.py runserver 0.0.0.0"
   release: sh -c "python manage.py migrate"

@@ -20,11 +20,14 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the application code
 COPY . /app
 
+# Create a directory for the database
 RUN mkdir -p /app/db
 
 # Run migrations
 RUN python manage.py migrate
 
-CMD ["celery -A hloot worker --loglevel=info"]
+# Set the default command
+ENTRYPOINT ["celery", "-A", "hloot", "worker", "--loglevel=info"]

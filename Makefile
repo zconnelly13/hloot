@@ -34,9 +34,6 @@ buildnocache:
 down:
 	docker-compose down
 
-dev:
-	docker-compose --file docker-dev.yml up --build
-
 collectstatic:
 	python3 manage.py collectstatic
 

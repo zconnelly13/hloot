@@ -24,25 +24,7 @@ services:
       args:
         MIDJOURNEY_API_KEY: ${MIDJOURNEY_API_KEY}
         REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL}
-    command: celery -A hloot worker --loglevel=info
-    volumes:
-      - db:/app/db
-      - .:/app
-    environment:
-      - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
-      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
-      - PYTHONPATH=/app
-    depends_on:
-      - web
-      - redis
-
-  celery-beat:
-    build:
-      context: .
-      args:
-        MIDJOURNEY_API_KEY: ${MIDJOURNEY_API_KEY}
-        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL}
-    command: celery -A hloot beat --loglevel=info
+    command: celery -A hloot worker --beat --loglevel=info
     volumes:
       - db:/app/db
       - .:/app

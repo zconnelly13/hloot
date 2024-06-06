@@ -53,16 +53,15 @@ jobs:
 
     - name: Build, tag, and push Docker image
       run: |
-        docker build -t registry.heroku.com/hloot/web -t registry.heroku.com/hloot/worker -t registry.heroku.com/hloot/beat .
+        docker build -t registry.heroku.com/hloot/web -t registry.heroku.com/hloot/worker .
         docker push registry.heroku.com/hloot/web
         docker push registry.heroku.com/hloot/worker
-        docker push registry.heroku.com/hloot/beat
 
     - name: Release the app
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
-        heroku container:release web worker beat --app hloot
+        heroku container:release web worker --app hloot
 
     - name: Scale dynos
       env:

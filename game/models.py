@@ -292,7 +292,7 @@ class Image(models.Model):
 
                 print(response_data)
 
-                if response_data['error']:
+                if response_data.get('error') is not None:
                     self.status = Image.Status.COMPLETED
                     self.selection = "https://media.istockphoto.com/id/1435353899/vector/pixel-censored-sign-vector-censorship-spot-on-transparent-background.jpg?s=1024x1024&w=is&k=20&c=WrFcwIR0GkoDX14FauoIp2mRNsJLvUczLJFfGRH6Eg8="  # noqa: E501
                     self.save()

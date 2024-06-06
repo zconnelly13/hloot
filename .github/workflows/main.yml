@@ -75,8 +75,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          persist-credentials: false # Otherwise, the token used will be the GITHUB_TOKEN, instead of your PAT.
-          token: ${{ secrets.GH_PAGES_TOKEN }}
+          persist-credentials: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v3

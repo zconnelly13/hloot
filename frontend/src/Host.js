@@ -82,7 +82,7 @@ function Host() {
       <center>
         {gameDetails && gameDetails.state === 'WAITING' && (
           <>
-          <QRCodeSVG size="128" value={`${window.location.origin}/#/play?code=${gameCode}`} style={styles.qrCode} />
+          <QRCodeSVG size="128" value={`${window.location.origin}${window.location.pathname}#/play?code=${gameCode}`} style={styles.qrCode} />
             <h1 style={styles.gameCode}>Hloot</h1>
             <div style={styles.waitingContainer}>
               <h2 style={styles.waitingText}>Waiting for players...</h2>

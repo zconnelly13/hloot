@@ -69,7 +69,12 @@ jobs:
         heroku ps:scale web=1 worker=1 beat=1 --app hloot
 
   deploy-frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository

@@ -28,6 +28,12 @@ lint:
 build:
 	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} -t hloot .
 
+buildnocache:
+	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} -t hloot --no-cache .
+
+down:
+	docker-compose down
+
 dev:
 	docker-compose --file docker-dev.yml up --build
 

@@ -20,25 +20,6 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Node.js and npm
-RUN apt-get update && apt-get install -y curl
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-RUN apt-get install -y nodejs
-
-# Copy application files
-COPY . /app/
-COPY .env /app/frontend/.env
-
-# Build the React frontend
-WORKDIR /app/frontend
-RUN npm install --prefix /app/frontend
-RUN npm run build --prefix /app/frontend
-
-# Move the build files to the Django static directory
-RUN mkdir -p /app/staticfiles/play/
-RUN cp -r build/* /app/staticfiles/
-RUN cp -r build/* /app/staticfiles/play/
-
 # Back to the app root
 WORKDIR /app
 

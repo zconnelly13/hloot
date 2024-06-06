@@ -95,6 +95,8 @@ jobs:
         working-directory: ./frontend
 
       - name: Build the React app
+        env:
+          REACT_APP_API_BASE_URL: https://hloot-9504ba8d8956.herokuapp.com/
         run: |
           echo "Building the React app..."
           npm run build

@@ -51,16 +51,13 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
 
-    - name: Build, tag, and push Docker image
+    - name: Build, Push, and Release Docker image
       run: |
         docker build -t registry.heroku.com/hloot/web .
         docker push registry.heroku.com/hloot/web
-
-    - name: Release the app
+        heroku container:release web worker beat --app hloot
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      run: |
-        heroku container:release web --app hloot
 
     - name: Scale dynos
       env:

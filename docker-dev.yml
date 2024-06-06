@@ -10,25 +10,54 @@ services:
       - "8000:8000"
     volumes:
       - db:/app/db
+      - .:/app
     environment:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
+      - PYTHONPATH=/app
+    depends_on:
+      - redis
 
-  gameloop:
+  celery:
     build:
       context: .
       args:
         MIDJOURNEY_API_KEY: ${MIDJOURNEY_API_KEY}
         REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL}
-    command: sh -c "python3 manage.py shell < game/game_loop.py"
+    command: celery -A hloot worker --loglevel=info
     volumes:
       - db:/app/db
+      - .:/app
     environment:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
       - PYTHONPATH=/app
     depends_on:
       - web
+      - redis
+
+  celery-beat:
+    build:
+      context: .
+      args:
+        MIDJOURNEY_API_KEY: ${MIDJOURNEY_API_KEY}
+        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL}
+    command: celery -A hloot beat --loglevel=info
+    volumes:
+      - db:/app/db
+      - .:/app
+    environment:
+      - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
+      - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
+      - PYTHONPATH=/app
+    depends_on:
+      - web
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
 
   frontend:
     build:

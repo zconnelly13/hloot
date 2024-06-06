@@ -1,5 +1,7 @@
 venv/
 db.sqlite3
+celerydb.sqlite
+results.sqlite
 .env
 staticfiles/
 celerybeat-schedule

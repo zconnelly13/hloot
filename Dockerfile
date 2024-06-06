@@ -26,6 +26,3 @@ RUN mkdir -p /app/db
 
 # Run migrations
 RUN python manage.py migrate
-
-# Start the Django server and the continuous script loop
-CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8000"]

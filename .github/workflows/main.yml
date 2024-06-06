@@ -1,21 +1,69 @@
-name: test
-on: [pull_request, push]
-jobs:
+name: CI, Tests, and Deploy to Heroku
 
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-    - run: pip install flake8
-    - run: make lint
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install flake8
+      run: pip install flake8
+    - name: Run linter
+      run: make lint
 
   test:
     runs-on: ubuntu-latest
     env:
       MIDJOURNEY_API_KEY: "<fake-api-key>"
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-    - run: pip install -r requirements.txt
-    - run: make test
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run tests
+      run: make test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Log in to the Heroku Container Registry
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
+
+    - name: Build, tag, and push Docker image
+      run: |
+        docker build -t registry.heroku.com/hloot/web .
+        docker push registry.heroku.com/hloot/web
+
+    - name: Release the app
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: |
+        heroku container:release web --app hloot
+
+    - name: Scale dynos
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: |
+        heroku ps:scale web=1 worker=1 beat=1 --app hloot

@@ -14,6 +14,7 @@ services:
     environment:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
+      - REDIS_URL=${REDIS_URL}
 
   celery:
     build:
@@ -29,6 +30,7 @@ services:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
       - PYTHONPATH=/app
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       - web
       - redis
@@ -47,6 +49,7 @@ services:
       - MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY}
       - REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
       - PYTHONPATH=/app
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       - web
       - redis

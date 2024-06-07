@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import promptOptions from './promptOptions';
+import styles from './playStyles';
 
 const csrftoken = Cookies.get('csrftoken');
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
@@ -22,6 +24,31 @@ function Play() {
   const [joined, setJoined] = useState(!!initialGameCode && !!initialName);
   const [prompt, setPrompt] = useState('');
   const [guess, setGuess] = useState('');
+
+  let lastTap = 0;
+
+  const handleDoubleClick = () => {
+    if (gameDetails && gameDetails.state === 'PLAYING' && gameDetails.round_state === 'PROMPT' && gameDetails.current_player === name) {
+      const randomPrompt = promptOptions[Math.floor(Math.random() * promptOptions.length)];
+      setPrompt(randomPrompt);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    if (tapLength < 500 && tapLength > 0) {
+      handleDoubleClick();
+    }
+    lastTap = currentTime;
+  };
+
+  useEffect(() => {
+    document.addEventListener('touchend', handleTouchEnd);
+    return () => {
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [gameDetails, name]);
 
   const handleCodeChange = (e) => {
     const newGameCode = e.target.value.slice(0, 4);
@@ -147,7 +174,7 @@ function Play() {
   }, [joined, gameCode]);
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} onDoubleClick={handleDoubleClick}>
       {!codeEntered ? (
         <div style={styles.inputContainer}>
           <input
@@ -232,114 +259,5 @@ function Play() {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    background: "url('https://cl.imagineapi.dev/assets/7ca88a00-35e3-4b39-81c1-c76c6e204e36.png') no-repeat center center fixed",
-    backgroundSize: 'cover',
-    backgroundColor: '#214a58',
-    fontFamily: 'Arial, sans-serif',
-    padding: '2rem',
-  },
-  inputContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '2rem',
-    borderRadius: '8px',
-    fontSize: '2.5rem',
-  },
-  input: {
-    fontSize: '1.5rem',
-    padding: '0.5rem',
-    marginBottom: '1rem',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    width: '100%',
-    maxWidth: '300px',
-    textAlign: 'center',
-  },
-  button: {
-    fontSize: '1.5rem',
-    padding: '0.5rem 1rem',
-    borderRadius: '4px',
-    border: 'none',
-    backgroundColor: 'transparent',
-    WebkitBackdropFilter: 'blur(20px)',
-    backdropFilter: 'blur(20px)',
-    color: '#fff',
-    cursor: 'pointer',
-    width: '100%',
-    maxWidth: '300px',
-    marginTop: '1rem',
-  },
-  textarea: {
-    fontSize: '1rem',
-    padding: '0.5rem',
-    marginBottom: '1rem',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-    width: '100%',
-    maxWidth: '300px',
-    height: '100px',
-  },
-  highlightedText: {
-    fontSize: '2rem',
-    color: '#fff',
-    WebkitBackdropFilter: 'blur(15px)',
-    backdropFilter: 'blur(15px)',
-    borderRadius: '8px',
-    paddingTop: '1vh',
-    paddingBottom: '1vh',
-    paddingLeft: '7vw',
-    paddingRight: '7vw',
-  },
-  polaroid: {
-    backgroundColor: 'white',
-    padding: '1rem',
-    border: '2px solid #ddd',
-    borderRadius: '10px',
-    display: 'inline-block',
-    textAlign: 'center',
-    width: '80%',
-    maxWidth: '800px',
-    marginTop: '2rem',
-    cursor: 'pointer',
-  },
-  largeImage: {
-    width: '100%',
-    height: 'auto',
-  },
-  waitingMessage: {
-    fontSize: '3rem',
-    color: 'white',
-    WebkitTextStroke: '1px black',
-    paddingLeft: '2rem',
-    paddingRight: '2rem',
-  },
-  caption: {
-    marginTop: '1rem',
-    fontSize: '1rem',
-    color: '#555',
-    minHeight: '50px',
-    maxHeight: '150px',
-    overflowY: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0.5rem',
-  },
-  imagesContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: '1rem',
-  },
-};
 
 export default Play;

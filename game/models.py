@@ -281,7 +281,7 @@ class Image(models.Model):
             return
 
         # Note: Do not do this mock this out properly ffs
-        if settings.TESTING or True:
+        if settings.TESTING or settings.MIDJOURNEY_API_KEY == 'DEV':
             self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'
             self.status = Image.Status.COMPLETED
             self.save()

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -25,23 +25,23 @@ function Play() {
   const [prompt, setPrompt] = useState('');
   const [guess, setGuess] = useState('');
 
-  let lastTap = 0;
+  const lastTap = useRef(0);
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = useCallback(() => {
     if (gameDetails && gameDetails.state === 'PLAYING' && gameDetails.round_state === 'PROMPT' && gameDetails.current_player === name) {
       const randomPrompt = promptOptions[Math.floor(Math.random() * promptOptions.length)];
       setPrompt(randomPrompt);
     }
-  };
+  }, [gameDetails, name]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
+    const tapLength = currentTime - lastTap.current;
     if (tapLength < 500 && tapLength > 0) {
       handleDoubleClick();
     }
-    lastTap = currentTime;
-  };
+    lastTap.current = currentTime;
+  }, [handleDoubleClick]);
 
   const handleFullscreen = () => {
     const elem = document.documentElement; // Fullscreen for the entire document
@@ -61,7 +61,7 @@ function Play() {
     return () => {
       document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [gameDetails, name]);
+  }, [handleTouchEnd]);
 
   const handleCodeChange = (e) => {
     const newGameCode = e.target.value.slice(0, 4);
@@ -180,7 +180,7 @@ function Play() {
       };
 
       fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 5000); // Poll every 1 second
+      interval = setInterval(fetchGameDetails, 5000); // Poll every 5 seconds
     }
 
     return () => clearInterval(interval); // Clear interval on cleanup

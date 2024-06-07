@@ -26,10 +26,12 @@ lint:
 	flake8 game/ hloot/ 
 
 build:
-	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} -t hloot .
-
-buildnocache:
-	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} -t hloot --no-cache .
+	docker build --build-arg REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL} \
+                 --build-arg MIDJOURNEY_API_KEY=${MIDJOURNEY_API_KEY} \
+                 --build-arg DATABASE_URL=${DATABASE_URL} \
+                 --build-arg DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY}" \
+                 --build-arg DJANGO_DEBUG=${DJANGO_DEBUG} \
+                 -t hloot .
 
 down:
 	docker-compose down

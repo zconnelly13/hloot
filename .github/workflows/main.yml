@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MIDJOURNEY_API_KEY: "<fake-api-key>"
-      DJANGO_SECRET_KEY: "django-insecure-#(7"
+      DJANGO_SECRET_KEY: "django-insecure"
     steps:
     - name: Checkout code
       uses: actions/checkout@v2

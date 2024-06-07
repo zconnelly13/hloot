@@ -5,11 +5,12 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '100vh',
+    width: '100%',
     background: "url('https://cl.imagineapi.dev/assets/7ca88a00-35e3-4b39-81c1-c76c6e204e36.png') no-repeat center center fixed",
     backgroundSize: 'cover',
     backgroundColor: '#214a58',
     fontFamily: 'Arial, sans-serif',
-    padding: '2rem',
+    overflowX: 'hidden',
   },
   inputContainer: {
     display: 'flex',
@@ -46,7 +47,6 @@ const styles = {
     textAlign: 'center',
     display: 'flex',
     justifyContent: 'center',
-    marginLeft: '1.25rem',
   },
   textarea: {
     fontSize: '1rem',
@@ -54,10 +54,9 @@ const styles = {
     marginBottom: '1rem',
     borderRadius: '4px',
     border: '1px solid #ccc',
-    width: '100%',
+    minWidth: '250px',
     height: '100px',
     boxSizing: 'border-box',
-    marginRight: '8rem',
   },
   highlightedText: {
     fontSize: '2rem',
@@ -73,6 +72,7 @@ const styles = {
   polaroid: {
     backgroundColor: 'white',
     padding: '1rem',
+    paddingTop: '2rem',
     paddingBottom: '2rem', // Thicker bottom padding to maintain the polaroid look even without caption
     border: '2px solid #ddd',
     borderRadius: '10px',
@@ -90,7 +90,7 @@ const styles = {
     paddingBottom: '1rem', // Additional padding to simulate thicker bottom for polaroid
   },
   largeImage: {
-    width: '100%',
+    width: '90%',
     height: 'auto',
   },
   waitingMessage: {

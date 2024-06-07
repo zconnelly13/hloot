@@ -84,7 +84,7 @@ function Host() {
   }, [gameCode]);
 
   const getSpinner = () => {
-    const spinnerChars = ['|', '/', '-', '\\'];
+    const spinnerChars = ['|', '/', '|', '\\'];
     const spinnerChar = spinnerChars[dotCounter % spinnerChars.length];
     return spinnerChar;
   };

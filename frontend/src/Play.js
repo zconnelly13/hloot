@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
+const csrftoken = Cookies.get('csrftoken');
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
 
 
 function Play() {

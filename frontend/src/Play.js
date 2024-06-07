@@ -181,6 +181,19 @@ function Play() {
       ) : (
         <div style={styles.inputContainer}>
           <h2 style={styles.waitingMessage} onClick={handleHlootClick}>Hloot</h2>
+          {gameDetails && gameDetails.round_state === 'GUESSING' && gameDetails.current_player !== name && (
+            <div style={styles.polaroid}>
+              {gameDetails.images.find(image => image.round === gameDetails.current_round) && (
+                <div style={styles.polaroidInner}>
+                  <img
+                    src={gameDetails.images.find(image => image.round === gameDetails.current_round).selection}
+                    alt="Generated"
+                    style={styles.largeImage}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           {gameDetails && gameDetails.state === 'WAITING' && gameDetails.has_sufficient_players && (
             <button onClick={handleLetsGo} style={styles.button}>Let's Go</button>
           )}

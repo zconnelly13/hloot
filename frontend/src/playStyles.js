@@ -18,6 +18,8 @@ const styles = {
     padding: '2rem',
     borderRadius: '8px',
     fontSize: '2.5rem',
+    width: '100%',
+    maxWidth: '400px',
   },
   input: {
     fontSize: '1.5rem',
@@ -26,7 +28,6 @@ const styles = {
     borderRadius: '4px',
     border: '1px solid #ccc',
     width: '100%',
-    maxWidth: '300px',
     textAlign: 'center',
   },
   button: {
@@ -42,6 +43,10 @@ const styles = {
     width: '100%',
     maxWidth: '300px',
     marginTop: '1rem',
+    textAlign: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    marginLeft: '1.25rem',
   },
   textarea: {
     fontSize: '1rem',
@@ -50,8 +55,9 @@ const styles = {
     borderRadius: '4px',
     border: '1px solid #ccc',
     width: '100%',
-    maxWidth: '300px',
     height: '100px',
+    boxSizing: 'border-box',
+    marginRight: '8rem',
   },
   highlightedText: {
     fontSize: '2rem',
@@ -67,14 +73,21 @@ const styles = {
   polaroid: {
     backgroundColor: 'white',
     padding: '1rem',
+    paddingBottom: '2rem', // Thicker bottom padding to maintain the polaroid look even without caption
     border: '2px solid #ddd',
     borderRadius: '10px',
-    display: 'inline-block',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     textAlign: 'center',
-    width: '80%',
+    width: '90%',
     maxWidth: '800px',
-    marginTop: '2rem',
+    marginBottom: '2rem',
     cursor: 'pointer',
+  },
+  polaroidInner: {
+    paddingBottom: '1rem', // Additional padding to simulate thicker bottom for polaroid
   },
   largeImage: {
     width: '100%',

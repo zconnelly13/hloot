@@ -56,14 +56,14 @@ jobs:
       env:
         DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       run: |
-        docker build -t registry.heroku.com/hloot/web .
+        docker build --build-arg DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} -t registry.heroku.com/hloot/web .
         docker push registry.heroku.com/hloot/web
 
     - name: Build, tag, and push worker
       env:
         DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
       run: |
-        docker build -t registry.heroku.com/hloot/worker -f DockerfileWorker .
+        docker build --build-arg DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} -t registry.heroku.com/hloot/worker -f DockerfileWorker .
         docker push registry.heroku.com/hloot/worker
 
     - name: Release the app

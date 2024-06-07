@@ -33,8 +33,10 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
+    CSRF_TRUSTED_ORIGINS = ['*']
 else:
     ALLOWED_HOSTS = ['localhost', 'zconnelly13.github.io', 'hloot-9504ba8d8956.herokuapp.com']
+    CSRF_TRUSTED_ORIGINS = ['zconnelly13.github.io', 'hloot-9504ba8d8956.herokuapp.com']
 
 
 # Application definition

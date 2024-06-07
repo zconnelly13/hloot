@@ -43,6 +43,19 @@ function Play() {
     lastTap = currentTime;
   };
 
+  const handleFullscreen = () => {
+    const elem = document.documentElement; // Fullscreen for the entire document
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { // Firefox
+      elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE/Edge
+      elem.msRequestFullscreen();
+    }
+  };
+
   useEffect(() => {
     document.addEventListener('touchend', handleTouchEnd);
     return () => {
@@ -199,7 +212,7 @@ function Play() {
         </div>
       ) : (
         <div style={styles.inputContainer}>
-          <h2 style={styles.waitingMessage}>Hloot</h2>
+          <h2 style={styles.waitingMessage} onClick={handleFullscreen}>Hloot</h2>
           {gameDetails && gameDetails.state === 'WAITING' && gameDetails.has_sufficient_players && (
             <button onClick={handleLetsGo} style={styles.button}>Let's Go</button>
           )}

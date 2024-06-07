@@ -41,7 +41,9 @@ up:
 	docker-compose up
 
 prune:
-	docker system prune -a
+	docker system prune -a -f
+
+nup: down prune build up
 
 proxy:
 	docker-compose --file docker-compose-nginx-dev.yml up --build

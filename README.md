@@ -1,24 +1,45 @@
 # Hloot
 
-### Installation Instructions
+### Prerequisites
+
+- Docker Desktop https://www.docker.com/products/docker-desktop/t
+
+### Setup
 
 ```bash
-# TODO: this
+cp .env.dist .env
 ```
 
-### Running the Game
+The default values should work here except for the midjourney api key. I
+do most of my development with test images, though, which you can do by
+by leaving the midjourney api key set to "DEV".
+
+### Running the Game Locally
 
 ```bash
-# TODO: this
+make build
+make up
+open localhost/
 ```
 
-### TODO
+### Production
+
+The backend is hosted on Heroku and the frontend is hosted on github pages.
+It's automatically tested and deployed via github actions when changes are
+made to the `main` branch.
+
+- [Frontend Host](https://zconnelly13.github.io/hloot)
+- [Frontend Play](https://zconnelly13.github.io/hloot)
+- [Backend](https://hloot-9504ba8d8956.herokuapp.com/)
+
+It's a jackbox-style game where you run the host on a main screen and then
+everyone plays from their phones.
+
+### Running the Tests
 
 ```bash
-- clean frontend UI
-    - disable scroll
-    - dynamic font sizes
-- make it accessible on at least localhost
-- clean up old games (soft delete?)
-- actual deployment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+make test
 ```

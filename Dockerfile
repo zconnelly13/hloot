@@ -29,6 +29,7 @@ RUN apt-get update \
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir psycopg2
 
 # Copy project files
 COPY . /app

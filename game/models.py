@@ -1,3 +1,4 @@
+from datetime import timedelta
 import http.client
 import json
 import random
@@ -5,6 +6,7 @@ import random
 from django.conf import settings
 from django.db import models
 from django.db import transaction
+from django.utils import timezone
 
 
 class Game(models.Model):
@@ -190,6 +192,7 @@ class Image(models.Model):
         ERROR = 'ERROR'
         COMPLETED = 'COMPLETED'
 
+    created_at = models.DateTimeField(auto_now_add=True)
     prompt = models.CharField(max_length=1024)
     choice1 = models.URLField(null=True, blank=True)
     choice2 = models.URLField(null=True, blank=True)
@@ -221,6 +224,14 @@ class Image(models.Model):
             'round': self.round,
         }
 
+    def check_timed_out(self):
+        if self.created_at < timezone.now() - timedelta(minutes=5):
+            self.status = Image.Status.COMPLETED
+            self.selection = "https://static.vecteezy.com/system/resources/previews/007/077/420/non_2x/time-out-advertising-badge-sticker-with-clock-icon-time-out-illustration-free-vector.jpg"  # noqa: E501
+            self.save()
+            return True
+        return False
+
     def process(self):
         if self.status == Image.Status.NOT_STARTED:
             self.generate()
@@ -228,7 +239,8 @@ class Image(models.Model):
             self.check_completed()
 
     def generate(self):
-        # Note: Do not do this mock this out properly ffs
+        if self.check_timed_out():
+            return
         if settings.TESTING or settings.MIDJOURNEY_API_KEY == 'DEV':
             self.external_id = '1234'
             self.status = Image.Status.PENDING
@@ -265,6 +277,9 @@ class Image(models.Model):
                 self.save()
 
     def check_completed(self):
+        if self.check_timed_out():
+            return
+
         # Note: Do not do this mock this out properly ffs
         if settings.TESTING or True:
             self.selection = f'https://picsum.photos/{str(random.randint(1000, 1050))}'

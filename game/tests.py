@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.db.utils import IntegrityError
 from django.test import Client
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from game.models import Game
 from game.models import Image
@@ -397,7 +400,7 @@ class TestImageGeneration(TestCase):
         g.save()
         p = Player(name='Zac', game=g)
         p.save()
-        image = Image(prompt='Dogs playing poker.', game=g, player=p, round=0)
+        image = Image.objects.create(prompt='Dogs playing poker.', game=g, player=p, round=0)
         self.assertFalse(image.is_done())
         image.generate()
         self.assertFalse(image.is_done())
@@ -409,7 +412,7 @@ class TestImageGeneration(TestCase):
         g.save()
         p = Player(name='Zac', game=g)
         p.save()
-        image = Image(prompt='Dogs playing poker.', game=g, player=p, round=0)
+        image = Image.objects.create(prompt='Dogs playing poker.', game=g, player=p, round=0)
         self.assertEqual(image.status, Image.Status.NOT_STARTED)
         image.generate()
         self.assertIsNotNone(image.external_id)
@@ -417,3 +420,15 @@ class TestImageGeneration(TestCase):
         image.check_completed()
         self.assertIsNotNone(image.selection)
         self.assertEqual(image.status, Image.Status.COMPLETED)
+
+    def test_check_completed_sets_to_completed_if_image_takes_too_long_to_generate(self):
+        g = Game(code='1234')
+        g.save()
+        p = Player(name='Zac', game=g)
+        p.save()
+        image = Image.objects.create(prompt='Dogs playing poker.', game=g, player=p, round=0)
+        image.generate()
+        image.created_at = timezone.now() - timedelta(minutes=6)
+        image.check_completed()
+        self.assertEqual(image.status, Image.Status.COMPLETED)
+        self.assertEqual(image.selection, "https://static.vecteezy.com/system/resources/previews/007/077/420/non_2x/time-out-advertising-badge-sticker-with-clock-icon-time-out-illustration-free-vector.jpg")  # noqa: E 501

@@ -5,11 +5,15 @@ FROM python:3.10
 ARG MIDJOURNEY_API_KEY
 ARG REACT_APP_API_BASE_URL
 ARG DATABASE_URL
+ARG DJANGO_SECRET_KEY
+ARG DJANGO_DEBUG
 
 # Set runtime environment variables
 ENV MIDJOURNEY_API_KEY=$MIDJOURNEY_API_KEY
 ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
 ENV DATABASE_URL=$DATABASE_URL
+ENV DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
+ENV DJANGO_DEBUG=$DJANGO_DEBUG
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -33,6 +37,9 @@ RUN pip install --no-cache-dir psycopg2
 
 # Copy project files
 COPY . /app
+
+# Collect static files
+RUN python manage.py collectstatic --noinput
 
 # Create and set permissions for the db directory
 RUN mkdir -p /app/db && chown -R www-data:www-data /app/db

@@ -28,9 +28,8 @@ The backend is hosted on Heroku and the frontend is hosted on github pages.
 It's automatically tested and deployed via github actions when changes are
 made to the `main` branch.
 
-- [Frontend Host](https://zconnelly13.github.io/hloot)
-- [Frontend Play](https://zconnelly13.github.io/hloot)
-- [Backend](https://hloot-9504ba8d8956.herokuapp.com/)
+- Frontend -> https://zconnelly13.github.io/hloot
+- Backend -> https://hloot-9504ba8d8956.herokuapp.com/
 
 It's a jackbox-style game where you run the host on a main screen and then
 everyone plays from their phones.

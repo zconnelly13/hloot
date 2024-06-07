@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -10,7 +10,6 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
-
 
 function Play() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,43 +24,32 @@ function Play() {
   const [prompt, setPrompt] = useState('');
   const [guess, setGuess] = useState('');
 
-  const lastTap = useRef(0);
-
-  const handleDoubleClick = useCallback(() => {
+  const handleHlootClick = () => {
     if (gameDetails && gameDetails.state === 'PLAYING' && gameDetails.round_state === 'PROMPT' && gameDetails.current_player === name) {
       const randomPrompt = promptOptions[Math.floor(Math.random() * promptOptions.length)];
       setPrompt(randomPrompt);
     }
-  }, [gameDetails, name]);
-
-  const handleTouchEnd = useCallback(() => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap.current;
-    if (tapLength < 500 && tapLength > 0) {
-      handleDoubleClick();
-    }
-    lastTap.current = currentTime;
-  }, [handleDoubleClick]);
-
-  const handleFullscreen = () => {
-    const elem = document.documentElement; // Fullscreen for the entire document
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen();
-    } else if (elem.mozRequestFullScreen) { // Firefox
-      elem.mozRequestFullScreen();
-    } else if (elem.webkitRequestFullscreen) { // Chrome, Safari, and Opera
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { // IE/Edge
-      elem.msRequestFullscreen();
-    }
   };
 
   useEffect(() => {
-    document.addEventListener('touchend', handleTouchEnd);
-    return () => {
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [handleTouchEnd]);
+    let interval;
+    if (joined) {
+      const fetchGameDetails = () => {
+        axios.get(`/game/state/${gameCode}`)
+          .then(response => {
+            setGameDetails(response.data);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      };
+
+      fetchGameDetails();
+      interval = setInterval(fetchGameDetails, 5000); // Poll every 5 seconds
+    }
+
+    return () => clearInterval(interval); // Clear interval on cleanup
+  }, [joined, gameCode]);
 
   const handleCodeChange = (e) => {
     const newGameCode = e.target.value.slice(0, 4);
@@ -166,28 +154,8 @@ function Play() {
       });
   };
 
-  useEffect(() => {
-    let interval;
-    if (joined) {
-      const fetchGameDetails = () => {
-        axios.get(`/game/state/${gameCode}`)
-          .then(response => {
-            setGameDetails(response.data);
-          })
-          .catch(error => {
-            console.log(error);
-          });
-      };
-
-      fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 5000); // Poll every 5 seconds
-    }
-
-    return () => clearInterval(interval); // Clear interval on cleanup
-  }, [joined, gameCode]);
-
   return (
-    <div style={styles.container} onDoubleClick={handleDoubleClick}>
+    <div style={styles.container}>
       {!codeEntered ? (
         <div style={styles.inputContainer}>
           <input
@@ -212,7 +180,7 @@ function Play() {
         </div>
       ) : (
         <div style={styles.inputContainer}>
-          <h2 style={styles.waitingMessage} onClick={handleFullscreen}>Hloot</h2>
+          <h2 style={styles.waitingMessage} onClick={handleHlootClick}>Hloot</h2>
           {gameDetails && gameDetails.state === 'WAITING' && gameDetails.has_sufficient_players && (
             <button onClick={handleLetsGo} style={styles.button}>Let's Go</button>
           )}

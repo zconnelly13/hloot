@@ -5,3 +5,5 @@ results.sqlite
 .env
 staticfiles/
 celerybeat-schedule
+stable-diffusion-webui/
+media/

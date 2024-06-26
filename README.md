@@ -43,3 +43,17 @@ pip install -r requirements.txt
 export $(cat .env | xargs)
 make test
 ```
+
+### Setting Up Dall-E Mini
+```
+pip install pyyaml==5.4.1 --ignore-installed
+pip install -q dalle-mini
+pip install -q git+https://github.com/patil-suraj/vqgan-jax.git
+
+pip install ipywidgets
+pip install --upgrade tqdm
+```
+
+### Running AUTOMATIC1111
+
+see: https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon

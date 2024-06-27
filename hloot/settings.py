@@ -28,6 +28,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 if SECRET_KEY is None:
     raise ValueError("DJANGO_SECRET_KEY environment variable must be set")
 
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
@@ -58,7 +60,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+]
+
+if not TESTING:
+    MIDDLEWARE += [
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+    ]
+
+MIDDLEWARE += [
     "django.contrib.sessions.middleware.SessionMiddleware",
     'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",

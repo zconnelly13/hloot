@@ -1,7 +1,10 @@
+import os
+import base64
 from datetime import timedelta
 import http.client
 import json
 import random
+import uuid
 
 from django.conf import settings
 from django.db import models
@@ -204,6 +207,7 @@ class Image(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.NOT_STARTED)
     round = models.IntegerField()
+    image_data = models.TextField(null=True, blank=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -255,25 +259,26 @@ class Image(models.Model):
                 except Image.DoesNotExist:
                     return
                 self.status = Image.Status.PENDING
+                self.external_id = str(uuid.uuid4())
                 self.save()
 
                 data = {
-                    "prompt": f"{self.prompt} --ar 1:1"
+                    "prompt": f"{self.prompt}",
+                    "steps": 25,
+                    "force_task_id": self.external_id,
                 }
 
                 headers = {
-                    'Authorization': f'Bearer {settings.MIDJOURNEY_API_KEY}',
                     'Content-Type': 'application/json'
                 }
 
-                conn = http.client.HTTPSConnection("cl.imagineapi.dev")
-                conn.request("POST", "/items/images/", body=json.dumps(data), headers=headers)
+                conn = http.client.HTTPConnection("host.docker.internal", 7860)
+                conn.request("POST", "/sdapi/v1/txt2img", body=json.dumps(data), headers=headers)
 
                 response = conn.getresponse()
                 response_data = json.loads(response.read().decode('utf-8'))
                 print(response_data)
-
-                self.external_id = response_data['data']['id']
+                self.image_data = response_data['images'][0]
                 self.save()
 
     def check_completed(self):
@@ -294,34 +299,12 @@ class Image(models.Model):
                 except Image.DoesNotExist:
                     return
 
-                headers = {
-                    'Authorization': f'Bearer {settings.MIDJOURNEY_API_KEY}',
-                    'Content-Type': 'application/json'
-                }
-
-                conn = http.client.HTTPSConnection("cl.imagineapi.dev")
-                conn.request("GET", f"/items/images/{self.external_id}", headers=headers)
-
-                response = conn.getresponse()
-                response_data = json.loads(response.read().decode('utf-8'))
-
-                print(response_data)
-
-                if response_data.get('error') is not None:
+                if self.image_data is not None:
+                    image_dir = os.path.join(settings.MEDIA_ROOT, 'generated_images')
+                    os.makedirs(image_dir, exist_ok=True)
+                    image_path = os.path.join(image_dir, f'{self.external_id}.png')
+                    with open(image_path, 'wb') as f:
+                        f.write(base64.b64decode(self.image_data))
                     self.status = Image.Status.COMPLETED
-                    self.selection = "https://media.istockphoto.com/id/1435353899/vector/pixel-censored-sign-vector-censorship-spot-on-transparent-background.jpg?s=1024x1024&w=is&k=20&c=WrFcwIR0GkoDX14FauoIp2mRNsJLvUczLJFfGRH6Eg8="  # noqa: E501
-                    self.save()
-
-                if response_data['data']['status'] in ['pending', 'in-progress']:
-                    # Chill, Mary.
-                    return
-
-                if response_data['data']['status'] == 'completed':
-                    self.selection = response_data['data']['upscaled_urls'][0]
-                    self.status = Image.Status.COMPLETED
-                    self.save()
-
-                if response_data['data']['status'] == 'failed':
-                    self.selection = "https://media.istockphoto.com/id/1435353899/vector/pixel-censored-sign-vector-censorship-spot-on-transparent-background.jpg?s=1024x1024&w=is&k=20&c=WrFcwIR0GkoDX14FauoIp2mRNsJLvUczLJFfGRH6Eg8="  # noqa: E501
-                    self.status = Image.Status.COMPLETED
+                    self.selection = settings.MEDIA_URL + f'generated_images/{self.external_id}.png'
                     self.save()

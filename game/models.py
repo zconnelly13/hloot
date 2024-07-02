@@ -264,8 +264,11 @@ class Image(models.Model):
 
                 data = {
                     "prompt": f"{self.prompt}",
-                    "steps": 25,
+                    "steps": 64,
+                    "width": 512,
+                    "height": 512,
                     "force_task_id": self.external_id,
+                    "negative_prompt": "amateur, poorly drawn, ugly, flat",
                 }
 
                 headers = {

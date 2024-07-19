@@ -6,6 +6,8 @@ import json
 import random
 import uuid
 
+from game.prompt_enhancer import enhance_prompt
+
 from django.conf import settings
 from django.db import models
 from django.db import transaction
@@ -229,7 +231,7 @@ class Image(models.Model):
         }
 
     def check_timed_out(self):
-        if self.created_at < timezone.now() - timedelta(minutes=5):
+        if self.created_at < timezone.now() - timedelta(minutes=60):
             self.status = Image.Status.COMPLETED
             self.selection = "https://static.vecteezy.com/system/resources/previews/007/077/420/non_2x/time-out-advertising-badge-sticker-with-clock-icon-time-out-illustration-free-vector.jpg"  # noqa: E501
             self.save()
@@ -237,6 +239,7 @@ class Image(models.Model):
         return False
 
     def process(self):
+        self.refresh_from_db()
         if self.status == Image.Status.NOT_STARTED:
             self.generate()
         elif self.status == Image.Status.PENDING:
@@ -260,29 +263,37 @@ class Image(models.Model):
                     return
                 self.status = Image.Status.PENDING
                 self.external_id = str(uuid.uuid4())
+                print(f"Generating image {self.external_id}")
                 self.save()
 
-                data = {
-                    "prompt": f"{self.prompt}",
-                    "steps": 64,
-                    "width": 512,
-                    "height": 512,
-                    "force_task_id": self.external_id,
-                    "negative_prompt": "amateur, poorly drawn, ugly, flat",
-                }
+        print("Original Prompt: ", self.prompt)
+        enhanced_prompt = enhance_prompt(self.prompt)
+        print("Enhanced Prompt: ", enhanced_prompt)
 
-                headers = {
-                    'Content-Type': 'application/json'
-                }
+        data = {
+            "prompt": enhanced_prompt,
+            "steps": 32,
+            "batch_size": 1,
+            "width": 512,
+            "height": 512,
+            "force_task_id": self.external_id,
+            "restore_faces": True,
+            "negative_prompt": "amateur, poorly drawn, ugly, flat, deformed, mutant, disfigured",
+            "sampling_method": "euler",
+        }
 
-                conn = http.client.HTTPConnection("host.docker.internal", 7860)
-                conn.request("POST", "/sdapi/v1/txt2img", body=json.dumps(data), headers=headers)
+        headers = {
+            'Content-Type': 'application/json'
+        }
 
-                response = conn.getresponse()
-                response_data = json.loads(response.read().decode('utf-8'))
-                print(response_data)
-                self.image_data = response_data['images'][0]
-                self.save()
+        conn = http.client.HTTPConnection("host.docker.internal", 7860)
+        conn.request("POST", "/sdapi/v1/txt2img", body=json.dumps(data), headers=headers)
+
+        response = conn.getresponse()
+        response_data = json.loads(response.read().decode('utf-8'))
+        print(response_data)
+        self.image_data = response_data['images'][0]
+        self.save()
 
     def check_completed(self):
         if self.check_timed_out():

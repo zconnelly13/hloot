@@ -272,7 +272,7 @@ class Image(models.Model):
 
         data = {
             "prompt": enhanced_prompt,
-            "steps": 32,
+            "steps": 64,
             "batch_size": 1,
             "width": 512,
             "height": 512,
@@ -281,6 +281,8 @@ class Image(models.Model):
             "negative_prompt": "amateur, poorly drawn, ugly, flat, deformed, mutant, disfigured",
             "sampling_method": "euler",
         }
+
+        print(data)
 
         headers = {
             'Content-Type': 'application/json'
@@ -291,7 +293,6 @@ class Image(models.Model):
 
         response = conn.getresponse()
         response_data = json.loads(response.read().decode('utf-8'))
-        print(response_data)
         self.image_data = response_data['images'][0]
         self.save()
 

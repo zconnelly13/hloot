@@ -75,8 +75,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     width: '90%',
-    maxWidth: '800px',
-    maxHeight: '80vh',
+    maxWidth: '1000px', // Increased from 800px
+    maxHeight: '90vh', // Increased from 80vh
     boxSizing: 'border-box',
   },
   polaroidInner: {

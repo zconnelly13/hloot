@@ -38,6 +38,9 @@ down:
 up:
 	docker-compose up
 
+restart-celery:
+	docker-compose up --build -d celery
+
 prune:
 	docker system prune -a -f
 

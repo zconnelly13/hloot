@@ -153,8 +153,8 @@ function Host() {
             </div>
           )}
           {gameDetails.round_state === 'PRESENTING' && (
-            <div style={styles.polaroid}>
-              {gameDetails.display_image ? (
+            gameDetails.display_image ? (
+              <div style={styles.polaroid}>
                 <div style={styles.polaroidInner}>
                   <img
                     src={gameDetails.display_image.selection}
@@ -165,10 +165,12 @@ function Host() {
                     {gameDetails.display_image.prompt}
                   </div>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div style={styles.messageContainer}>
                 <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
-              )}
-            </div>
+              </div>
+            )
           )}
         </div>
       )}

@@ -41,4 +41,8 @@ up:
 prune:
 	docker system prune -a -f
 
+bup: down build up
 nup: down prune build up
+
+open:
+	open "${REACT_APP_API_BASE_URL}"

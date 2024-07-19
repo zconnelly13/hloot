@@ -58,6 +58,6 @@ stable-diffusion:
 
 
 # Aliases
-bup: down build up open
-nup: down prune build up open
+bup: down build open up
+nup: down prune build open up
 sd: stable-diffusion

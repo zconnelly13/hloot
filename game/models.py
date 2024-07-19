@@ -267,19 +267,19 @@ class Image(models.Model):
                 self.save()
 
         print("Original Prompt: ", self.prompt)
-        enhanced_prompt = enhance_prompt(self.prompt)
+        enhanced_prompt, sampling_method, step_count = enhance_prompt(self.prompt)
         print("Enhanced Prompt: ", enhanced_prompt)
 
         data = {
             "prompt": enhanced_prompt,
-            "steps": 64,
+            "steps": step_count,
             "batch_size": 1,
             "width": 512,
             "height": 512,
             "force_task_id": self.external_id,
             "restore_faces": True,
             "negative_prompt": "amateur, poorly drawn, ugly, flat, deformed, mutant, disfigured",
-            "sampling_method": "ddim",
+            "sampling_method": sampling_method,
         }
 
         print(data)

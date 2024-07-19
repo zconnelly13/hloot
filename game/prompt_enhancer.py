@@ -11,11 +11,14 @@ def enhance_prompt(prompt):
     composition = random.choice(category["composition"])
     additional_tags = ", ".join(random.sample(category["additional_tags"], 2))
 
+    sampling_method = category["sampling_method"]
+    step_count = random.randint(category["step_count_range"][0], category["step_count_range"][1])
+
     enhanced_prompt = (
         f"{prompt}, in the style of {artist}, {style}, {lighting} lighting, "
         f"{additional_tags}, {composition}"
     )
-    return enhanced_prompt
+    return enhanced_prompt, sampling_method, step_count
 
 
 def detect_tone(prompt):
@@ -118,7 +121,6 @@ def detect_tone(prompt):
     else:
         return "neutral"
 
-
 descriptors = {
     "dark and spooky": {
         "artist": "H.R. Giger",
@@ -128,7 +130,9 @@ descriptors = {
             "eerie", "mysterious", "ominous", "macabre", "foreboding",
             "trending on deviantart", "popular on ArtStation"
         ],
-        "composition": ["rule of thirds", "leading lines", "frame within a frame"]
+        "composition": ["rule of thirds", "leading lines", "frame within a frame"],
+        "sampling_method": "ddim",
+        "step_count_range": (80, 100)
     },
     "cozy and autumnal": {
         "artist": "Norman Rockwell",
@@ -138,7 +142,9 @@ descriptors = {
             "cozy", "autumnal", "inviting", "rustic", "pleasant",
             "featured on Pinterest", "popular on Instagram"
         ],
-        "composition": ["rule of thirds", "symmetry", "leading lines"]
+        "composition": ["rule of thirds", "symmetry", "leading lines"],
+        "sampling_method": "euler",
+        "step_count_range": (70, 90)
     },
     "bright and fun": {
         "artist": "Keith Haring",
@@ -148,7 +154,9 @@ descriptors = {
             "fun", "playful", "cheerful", "dynamic", "exciting",
             "trending on TikTok", "viral on Twitter"
         ],
-        "composition": ["dynamic composition", "rule of thirds", "asymmetry"]
+        "composition": ["dynamic composition", "rule of thirds", "asymmetry"],
+        "sampling_method": "ddim",
+        "step_count_range": (64, 80)
     },
     "romantic and dreamy": {
         "artist": "John William Waterhouse",
@@ -158,7 +166,9 @@ descriptors = {
             "gentle", "ethereal", "lovely", "charming", "serene",
             "trending on Tumblr", "popular on Behance"
         ],
-        "composition": ["golden ratio", "leading lines", "soft focus"]
+        "composition": ["golden ratio", "leading lines", "soft focus"],
+        "sampling_method": "euler",
+        "step_count_range": (70, 90)
     },
     "vintage and nostalgic": {
         "artist": "Edward Hopper",
@@ -168,7 +178,9 @@ descriptors = {
             "retro", "classic", "timeless", "antique", "sentimental",
             "featured on Pinterest", "nostalgic on Instagram"
         ],
-        "composition": ["rule of thirds", "framing", "central focus"]
+        "composition": ["rule of thirds", "framing", "central focus"],
+        "sampling_method": "euler",
+        "step_count_range": (70, 90)
     },
     "urban and modern": {
         "artist": "Jean-Michel Basquiat",
@@ -178,7 +190,9 @@ descriptors = {
             "cityscape", "edgy", "trendy", "sleek", "industrial",
             "trending on DeviantArt", "popular on ArtStation"
         ],
-        "composition": ["leading lines", "dynamic angles", "rule of thirds"]
+        "composition": ["leading lines", "dynamic angles", "rule of thirds"],
+        "sampling_method": "ddim",
+        "step_count_range": (80, 100)
     },
     "fantasy and magical": {
         "artist": "Brian Froud",
@@ -188,7 +202,9 @@ descriptors = {
             "mythical", "enchanted", "fairytale", "wizardry", "dreamlike",
             "trending on Tumblr", "popular on DeviantArt"
         ],
-        "composition": ["center composition", "rule of thirds", "golden ratio"]
+        "composition": ["center composition", "rule of thirds", "golden ratio"],
+        "sampling_method": "ddim",
+        "step_count_range": (80, 100)
     },
     "nature and tranquil": {
         "artist": "Claude Monet",
@@ -198,7 +214,9 @@ descriptors = {
             "serene", "peaceful", "calm", "idyllic", "harmonious",
             "featured on Pinterest", "trending on Instagram"
         ],
-        "composition": ["rule of thirds", "leading lines", "symmetry"]
+        "composition": ["rule of thirds", "leading lines", "symmetry"],
+        "sampling_method": "euler",
+        "step_count_range": (70, 90)
     },
     "abstract and surreal": {
         "artist": "Salvador Dali",
@@ -208,7 +226,9 @@ descriptors = {
             "dreamlike", "bizarre", "whimsical", "unreal", "imaginative",
             "trending on Behance", "popular on ArtStation"
         ],
-        "composition": ["dynamic composition", "asymmetry", "free form"]
+        "composition": ["dynamic composition", "asymmetry", "free form"],
+        "sampling_method": "ddim",
+        "step_count_range": (80, 100)
     },
     "sexy and glamorous": {
         "artist": "Helmut Newton",
@@ -218,7 +238,9 @@ descriptors = {
             "alluring", "provocative", "seductive", "enticing", "opulent",
             "trending on TikTok", "popular on Instagram"
         ],
-        "composition": ["rule of thirds", "central focus", "dynamic angles"]
+        "composition": ["rule of thirds", "central focus", "dynamic angles"],
+        "sampling_method": "ddim",
+        "step_count_range": (80, 100)
     },
     "fun and spooky": {
         "artist": "Tim Burton",
@@ -228,7 +250,9 @@ descriptors = {
             "quirky", "creepy", "eerie", "mysterious", "playful",
             "trending on DeviantArt", "popular on ArtStation"
         ],
-        "composition": ["rule of thirds", "leading lines", "asymmetry"]
+        "composition": ["rule of thirds", "leading lines", "asymmetry"],
+        "sampling_method": "ddim",
+        "step_count_range": (64, 80)
     },
     "neutral": {
         "artist": "Greg Rutkowski",
@@ -238,6 +262,8 @@ descriptors = {
             "beautiful", "stunning", "elegant", "timeless", "classic",
             "trending on DeviantArt", "popular on ArtStation"
         ],
-        "composition": ["rule of thirds", "golden ratio", "balanced"]
+        "composition": ["rule of thirds", "golden ratio", "balanced"],
+        "sampling_method": "euler",
+        "step_count_range": (70, 90)
     }
 }

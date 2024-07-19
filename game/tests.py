@@ -428,7 +428,7 @@ class TestImageGeneration(TestCase):
         p.save()
         image = Image.objects.create(prompt='Dogs playing poker.', game=g, player=p, round=0)
         image.generate()
-        image.created_at = timezone.now() - timedelta(minutes=6)
+        image.created_at = timezone.now() - timedelta(minutes=66)
         image.check_completed()
         self.assertEqual(image.status, Image.Status.COMPLETED)
         self.assertEqual(image.selection, "https://static.vecteezy.com/system/resources/previews/007/077/420/non_2x/time-out-advertising-badge-sticker-with-clock-icon-time-out-illustration-free-vector.jpg")  # noqa: E 501

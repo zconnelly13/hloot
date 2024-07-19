@@ -240,8 +240,8 @@ function Play() {
                         </div>
                       </div>
                     ))}
+                    <button onClick={handleNextRound} style={styles.button}>Next Round</button>
                   </div>
-                  <button onClick={handleNextRound} style={styles.button}>Next Round</button>
                 </div>
               ) : (
                 <p></p>

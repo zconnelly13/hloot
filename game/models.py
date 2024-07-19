@@ -279,7 +279,7 @@ class Image(models.Model):
             "force_task_id": self.external_id,
             "restore_faces": True,
             "negative_prompt": "amateur, poorly drawn, ugly, flat, deformed, mutant, disfigured",
-            "sampling_method": "euler",
+            "sampling_method": "ddim",
         }
 
         print(data)

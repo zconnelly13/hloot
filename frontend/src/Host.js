@@ -16,7 +16,7 @@ function Host() {
   const initialGameCode = searchParams.get('code') || '';
   const [gameCode, setGameCode] = useState(initialGameCode);
   const [gameDetails, setGameDetails] = useState(null);
-  const [dotCounter, setDotCounter] = useState(0); // State to keep track of counter
+  const [dotCounter, setDotCounter] = useState(0);
   const effectRan = useRef(false);
 
   useEffect(() => {
@@ -42,19 +42,19 @@ function Host() {
   useEffect(() => {
     let interval;
     if (gameCode) {
-      let currentIntervalTime = 1000; // Update every 1 second
+      let currentIntervalTime = 1000;
       let quickIntervalTime = 250;
 
       const fetchGameDetails = () => {
         axios.get(`/game/state/${gameCode}`)
           .then(response => {
             setGameDetails(response.data);
-            setDotCounter(prev => prev + 1); // Increment counter
+            setDotCounter(prev => prev + 1);
 
             if (response.data.round_state === 'PRESENTING') {
               if (currentIntervalTime !== quickIntervalTime) {
                 clearInterval(interval);
-                interval = setInterval(fetchGameDetails, quickIntervalTime); // Poll quickly while presenting
+                interval = setInterval(fetchGameDetails, quickIntervalTime);
                 currentIntervalTime = quickIntervalTime;
               }
               response.data.images.sort((a, b) => a.id - b.id).forEach(image => {
@@ -66,7 +66,7 @@ function Host() {
             } else if (response.data.round_state === 'PROMPT') {
               if (currentIntervalTime !== 1000) {
                 clearInterval(interval);
-                interval = setInterval(fetchGameDetails, 1000); // Poll every 1 second while not presenting
+                interval = setInterval(fetchGameDetails, 1000);
                 currentIntervalTime = 1000;
               }
             }
@@ -77,10 +77,10 @@ function Host() {
       };
 
       fetchGameDetails();
-      interval = setInterval(fetchGameDetails, 1000); // Poll every second
+      interval = setInterval(fetchGameDetails, 1000);
     }
 
-    return () => clearInterval(interval); // Clear interval on cleanup
+    return () => clearInterval(interval);
   }, [gameCode]);
 
   const getSpinner = () => {
@@ -110,70 +110,68 @@ function Host() {
 
   return (
     <div style={styles.container}>
-      <center>
-        {gameDetails && gameDetails.state === 'WAITING' && (
-          <>
-            <QRCodeSVG size="128" value={`${window.location.origin}${window.location.pathname}#/play?code=${gameCode}`} style={styles.qrCode} />
-            <h1 style={styles.gameCode}>Hloot</h1>
-            <div style={styles.waitingContainer}>
-              <h2 style={styles.waitingText}>Waiting for players {getSpinner()}</h2>
-              <ul style={styles.playersList}>
-                {gameDetails.players.map((player, index) => (
-                  <li key={index} style={styles.playerItem}>
-                    {player}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
-        )}
-        {gameDetails && gameDetails.state === 'PLAYING' && (
-          <div>
-            {gameDetails.round_state === 'PROMPT' && (
-              <div style={styles.messageContainer}>
-                <h2 style={styles.highlightedText}>{gameDetails.current_player}'s turn...</h2>
-              </div>
-            )}
-            {gameDetails.round_state === 'IMAGE_GENERATION' && (
-              <div style={styles.messageContainer}>
-                <h2 style={styles.highlightedText}>Generating {getSpinner()}</h2>
-              </div>
-            )}
-            {gameDetails.round_state === 'GUESSING' && (
-              <div style={styles.polaroid}>
-                {gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round) && (
-                  <div style={styles.polaroidInner}>
-                    <img
-                      src={gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round).selection}
-                      alt="Generated"
-                      style={styles.largeImage}
-                    />
-                    <div style={styles.caption}>{getPlayersStillGuessing()}</div>
-                  </div>
-                )}
-              </div>
-            )}
-            {gameDetails.round_state === 'PRESENTING' && (
-              <div>
-                {gameDetails.display_image ? (
-                  <div style={styles.polaroid}>
-                    <img
-                      src={gameDetails.display_image.selection}
-                      alt={gameDetails.display_image.prompt}
-                      style={styles.largeImage}
-                    />
-                    <div style={styles.caption}>
-                      {gameDetails.display_image.prompt}
-                    </div>
-                  </div>
-                ) : (
-                  <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
-                )}
-              </div>
-            )}
+      {gameDetails && gameDetails.state === 'WAITING' && (
+        <div style={styles.centeredContent}>
+          <QRCodeSVG size="128" value={`${window.location.origin}${window.location.pathname}#/play?code=${gameCode}`} style={styles.qrCode} />
+          <h1 style={styles.gameCode}>Hloot</h1>
+          <div style={styles.waitingContainer}>
+            <h2 style={styles.waitingText}>Waiting for players {getSpinner()}</h2>
+            <ul style={styles.playersList}>
+              {gameDetails.players.map((player, index) => (
+                <li key={index} style={styles.playerItem}>
+                  {player}
+                </li>
+              ))}
+            </ul>
           </div>
-        )}
-      </center>
+        </div>
+      )}
+      {gameDetails && gameDetails.state === 'PLAYING' && (
+        <div style={styles.centeredContent}>
+          {gameDetails.round_state === 'PROMPT' && (
+            <div style={styles.messageContainer}>
+              <h2 style={styles.highlightedText}>{gameDetails.current_player}'s turn...</h2>
+            </div>
+          )}
+          {gameDetails.round_state === 'IMAGE_GENERATION' && (
+            <div style={styles.messageContainer}>
+              <h2 style={styles.highlightedText}>Generating {getSpinner()}</h2>
+            </div>
+          )}
+          {gameDetails.round_state === 'GUESSING' && (
+            <div style={styles.polaroid}>
+              {gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round) && (
+                <div style={styles.polaroidInner}>
+                  <img
+                    src={gameDetails.images.sort((a, b) => a.id - b.id).find(image => image.round === gameDetails.current_round).selection}
+                    alt="Generated"
+                    style={styles.largeImage}
+                  />
+                  <div style={styles.caption}>{getPlayersStillGuessing()}</div>
+                </div>
+              )}
+            </div>
+          )}
+          {gameDetails.round_state === 'PRESENTING' && (
+            <div style={styles.polaroid}>
+              {gameDetails.display_image ? (
+                <div style={styles.polaroidInner}>
+                  <img
+                    src={gameDetails.display_image.selection}
+                    alt={gameDetails.display_image.prompt}
+                    style={styles.largeImage}
+                  />
+                  <div style={styles.caption}>
+                    {gameDetails.display_image.prompt}
+                  </div>
+                </div>
+              ) : (
+                <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

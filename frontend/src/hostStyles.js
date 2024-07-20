@@ -16,7 +16,7 @@ const styles = {
     justifyContent: 'center',
     textAlign: 'center',
     width: '100%',
-    height: '100%', // Ensure it takes the full height of the container
+    height: '100%',
   },
   gameCodeLabel: {
     fontSize: '2rem',
@@ -67,17 +67,14 @@ const styles = {
   },
   polaroid: {
     backgroundColor: 'white',
-    padding: '2rem 2rem 1rem 2rem',
-    border: '2px solid #ddd',
+    paddingTop: '1.5rem',
+    paddingLeft: '1.5rem',
+    paddingRight: '1.5rem',
+    paddingBottom: '1.5rem',
     borderRadius: '10px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '90%',
-    maxWidth: '1000px', // Increased from 800px
-    maxHeight: '90vh', // Increased from 80vh
-    boxSizing: 'border-box',
+    boxShadow: '0 0 15px rgba(0, 0, 0, 0.5)',
+    textAlign: 'center',
+    width: '80vh',
   },
   polaroidInner: {
     width: '100%',
@@ -89,24 +86,13 @@ const styles = {
   },
   largeImage: {
     width: '100%',
-    height: 'auto',
-    objectFit: 'contain', // Ensure image maintains aspect ratio
-    maxHeight: 'calc(100% - 50px)', // Subtracting some height for the caption
-    borderRadius: '10px',
+    borderRadius: '5px',
   },
   caption: {
-    marginTop: '1rem',
-    fontSize: '1rem',
-    color: '#555',
-    minHeight: '50px',
-    maxHeight: '100px',
-    overflowY: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0.5rem',
-    width: '100%',
-    boxSizing: 'border-box',
+    marginTop: '1.5rem',
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '14px',
+    color: '#333',
   },
   qrCode: {
     padding: '0.8rem',

@@ -121,6 +121,7 @@ def detect_tone(prompt):
     else:
         return "neutral"
 
+
 descriptors = {
     "dark and spooky": {
         "artist": "H.R. Giger",

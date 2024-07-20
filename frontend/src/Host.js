@@ -61,7 +61,7 @@ function Host() {
         intervalRef.current = setInterval(fetchGameDetails, 250);
         intervalTime = 250;
         prefetchImages(data.images, data.current_round);
-      } else if (data.round_state === 'PROMPT' && intervalTime !== 1000) {
+      } else if (intervalTime !== 1000) {
         clearInterval(intervalRef.current);
         intervalRef.current = setInterval(fetchGameDetails, 1000);
         intervalTime = 1000;

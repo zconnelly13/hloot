@@ -127,7 +127,7 @@ function Host() {
       {gameDetails.round_state === 'IMAGE_GENERATION' && (
         <div style={styles.messageContainer}>
           <h2 style={styles.highlightedText}>
-            Generating{' '}
+            Generating...{' '}
             <span style={{ display: 'inline-flex', alignItems: 'center' }}>
               <CircleLoader size={32} color="white" speedMultiplier={0.5} />
             </span>

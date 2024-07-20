@@ -68,6 +68,7 @@ const styles = {
     paddingBottom: '1vh',
     paddingLeft: '7vw',
     paddingRight: '7vw',
+    whiteSpace: 'nowrap',
   },
   polaroid: {
     backgroundColor: 'white',

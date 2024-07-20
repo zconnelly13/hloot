@@ -210,7 +210,7 @@ function Play() {
                   <button onClick={handleSubmitPrompt} style={styles.button}>Submit Prompt</button>
                 </div>
               ) : gameDetails.round_state === 'PROMPT' ? (
-                <p style={styles.highlightedText}>{gameDetails.current_player}'s turn...</p>
+                <p style={styles.highlightedText}>{`${gameDetails.current_player}'s turn...`}</p>
               ) : gameDetails.round_state === 'IMAGE_GENERATION' ? (
                 <p style={styles.highlightedText}>Generating...</p>
               ) : gameDetails.round_state === 'GUESSING' && gameDetails.images.find(image => image.round === gameDetails.current_round && image.player === name) ? (

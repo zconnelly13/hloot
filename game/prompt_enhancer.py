@@ -24,7 +24,7 @@ def enhance_prompt(prompt):
 def detect_tone(prompt):
     tones = {
         "dark and spooky": [
-            "dark", "spooky", "haunted", "ghost", "creepy", "eerie", "mysterious",
+            "dark", "haunted", "ghost", "creepy", "eerie", "mysterious",
             "sinister", "ominous", "shadowy", "macabre", "foreboding", "grisly",
             "horror", "dreadful", "chilling", "gothic", "nightmare", "haunting",
             "unsettling", "wicked", "deathly", "phantom", "horrific", "terror",

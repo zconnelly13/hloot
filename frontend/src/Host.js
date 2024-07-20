@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import QRCodeSVG from 'qrcode.react';
 import Cookies from 'js-cookie';
+import { CircleLoader, PuffLoader } from 'react-spinners';
 import styles from './hostStyles';
 
 const csrftoken = Cookies.get('csrftoken');
@@ -16,7 +17,6 @@ function Host() {
   const initialGameCode = searchParams.get('code') || '';
   const [gameCode, setGameCode] = useState(initialGameCode);
   const [gameDetails, setGameDetails] = useState(null);
-  const [dotCounter, setDotCounter] = useState(0);
   const effectRan = useRef(false);
   const intervalRef = useRef(null);
 
@@ -42,34 +42,18 @@ function Host() {
   }, [gameCode, createGame]);
 
   const setupGameDetailsInterval = useCallback(() => {
-    let intervalTime = 1000;
-
     const fetchGameDetails = async () => {
       try {
         const response = await axios.get(`/game/state/${gameCode}`);
         setGameDetails(response.data);
-        setDotCounter(prev => prev + 1);
-        adjustFetchInterval(response.data, intervalTime);
+        prefetchImages(response.data.images, response.data.current_round);
       } catch (error) {
         console.error('Error fetching game details:', error);
       }
     };
 
-    const adjustFetchInterval = (data, intervalTime) => {
-      if (data.round_state === 'PRESENTING' && intervalTime !== 250) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(fetchGameDetails, 250);
-        intervalTime = 250;
-        prefetchImages(data.images, data.current_round);
-      } else if (intervalTime !== 1000) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(fetchGameDetails, 1000);
-        intervalTime = 1000;
-      }
-    };
-
     fetchGameDetails();
-    return setInterval(fetchGameDetails, intervalTime);
+    return setInterval(fetchGameDetails, 250);
   }, [gameCode]);
 
   useEffect(() => {
@@ -88,11 +72,6 @@ function Host() {
       });
   };
 
-  const getSpinner = () => {
-    const spinnerChars = ['|', '/', '|', '\\'];
-    return spinnerChars[dotCounter % spinnerChars.length];
-  };
-
   const getPlayersStillGuessing = () => {
     if (!gameDetails || !gameDetails.images) return '';
 
@@ -108,7 +87,11 @@ function Host() {
       const lastPlayer = playersStillGuessing.pop();
       return `${playersStillGuessing.join(', ')}, and ${lastPlayer} are still guessing...`;
     } else {
-      return `Generating ${getSpinner()}`;
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+          Generating <CircleLoader size={10} color="black" speedMultiplier={0.5} />
+        </span>
+      );
     }
   };
 
@@ -117,7 +100,12 @@ function Host() {
       <QRCodeSVG size="128" value={`${window.location.origin}${window.location.pathname}#/play?code=${gameCode}`} style={styles.qrCode} />
       <h1 style={styles.gameCode}>Hloot</h1>
       <div style={styles.waitingContainer}>
-        <h2 style={styles.waitingText}>Waiting for players {getSpinner()}</h2>
+        <h2 style={styles.waitingText}>
+          Waiting for players...<br /><br />
+          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <PuffLoader size={16} color="white" speedMultiplier={0.6} />
+          </span>
+        </h2>
         <ul style={styles.playersList}>
           {gameDetails.players.map((player, index) => (
             <li key={index} style={styles.playerItem}>
@@ -138,7 +126,12 @@ function Host() {
       )}
       {gameDetails.round_state === 'IMAGE_GENERATION' && (
         <div style={styles.messageContainer}>
-          <h2 style={styles.highlightedText}>Generating {getSpinner()}</h2>
+          <h2 style={styles.highlightedText}>
+            Generating{' '}
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <CircleLoader size={32} color="white" speedMultiplier={0.5} />
+            </span>
+          </h2>
         </div>
       )}
       {gameDetails.round_state === 'GUESSING' && renderGuessingState()}
@@ -162,19 +155,17 @@ function Host() {
 
   const renderPresentingState = () => {
     const displayImage = gameDetails.display_image;
-    return (
-      displayImage ? (
-        <div style={styles.polaroid}>
-          <div style={styles.polaroidInner}>
-            <img src={displayImage.selection} alt={displayImage.prompt} style={styles.largeImage} />
-            <div style={styles.caption}>{displayImage.prompt}</div>
-          </div>
+    return displayImage ? (
+      <div style={styles.polaroid}>
+        <div style={styles.polaroidInner}>
+          <img src={displayImage.selection} alt={displayImage.prompt} style={styles.largeImage} />
+          <div style={styles.caption}>{displayImage.prompt}</div>
         </div>
-      ) : (
-        <div style={styles.messageContainer}>
-          <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
-        </div>
-      )
+      </div>
+    ) : (
+      <div style={styles.messageContainer}>
+        <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
+      </div>
     );
   };
 
@@ -191,11 +182,7 @@ function Host() {
     }
   };
 
-  return (
-    <div style={styles.container}>
-      {renderGameDetails()}
-    </div>
-  );
+  return <div style={styles.container}>{renderGameDetails()}</div>;
 }
 
 export default Host;

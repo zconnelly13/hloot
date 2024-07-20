@@ -31,14 +31,14 @@ const styles = {
   },
   waitingContainer: {
     backdropFilter: 'blur(15px)',
-    padding: '2rem',
+    padding: '1rem',
     borderRadius: '8px',
     border: '2px',
   },
   waitingText: {
     fontSize: '1rem',
     color: 'white',
-    marginBottom: '2rem',
+    noWrap: 'true',
   },
   playersList: {
     listStyleType: 'none',
@@ -48,6 +48,7 @@ const styles = {
     fontSize: '2rem',
     color: 'white',
     padding: '0',
+    marginTop: '0.75rem',
   },
   messageContainer: {
     backdropFilter: 'blur(15px)',

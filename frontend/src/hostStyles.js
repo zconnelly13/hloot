@@ -102,6 +102,14 @@ const styles = {
     borderRadius: '10px',
     marginBottom: '0rem',
   },
+  floatingQRCode: {
+    position: 'absolute',
+    bottom: '20px',
+    right: '20px',
+    width: '50px',
+    height: '50px',
+    zIndex: 1000,
+  },
 };
 
 export default styles;

@@ -155,17 +155,24 @@ function Host() {
 
   const renderPresentingState = () => {
     const displayImage = gameDetails.display_image;
-    return displayImage ? (
-      <div style={styles.polaroid}>
-        <div style={styles.polaroidInner}>
-          <img src={displayImage.selection} alt={displayImage.prompt} style={styles.largeImage} />
-          <div style={styles.caption}>{displayImage.prompt}</div>
+    return (
+      <>
+        {displayImage ? (
+          <div style={styles.polaroid}>
+            <div style={styles.polaroidInner}>
+              <img src={displayImage.selection} alt={displayImage.prompt} style={styles.largeImage} />
+              <div style={styles.caption}>{displayImage.prompt}</div>
+            </div>
+          </div>
+        ) : (
+          <div style={styles.messageContainer}>
+            <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
+          </div>
+        )}
+        <div style={styles.floatingQRCode}>
+          <QRCodeSVG size={50} value={`${window.location.origin}${window.location.pathname}#/play?code=${gameCode}`} />
         </div>
-      </div>
-    ) : (
-      <div style={styles.messageContainer}>
-        <h2 style={styles.highlightedText}>Waiting for {gameDetails.current_player} to pick an image...</h2>
-      </div>
+      </>
     );
   };
 
